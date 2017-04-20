@@ -167,8 +167,8 @@ There is a change in the fruit removal modules. However, there is a consistent p
 * **Link level.** Interaction variance between nodes. The outcome is a matrix with dependence values. Computes the contribution of each species to the overall nestedness.
 
 ```{r link level}
-link_lev_mart<-linklevel(mart_f)
-link_lev_matas<-linklevel(matas_f)
+linklevel(mart_f)
+linklevel(matas_f)
 ```
 
 &nbsp;

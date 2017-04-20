@@ -116,7 +116,7 @@ networklevel(mart, index = c("connectance","web asymmetry","cluster coefficient"
 networklevel(matas,index = c("connectance","web asymmetry","cluster coefficient","nestedness","weighted nestedness"))
 ```
 
-```{r Modularity, message=F, cache=T, echo=F, include = FALSE}
+```{r Modularity, message=F, cache=F, echo=F, include = FALSE}
 mod_mart<-computeModules(mart)
 mod_matas<-computeModules(matas)
 ```
@@ -161,8 +161,8 @@ There is a change in the visitation modules. Perhaps the module in Martinazo com
 * **Link level.** Interaction variance between nodes. The outcome is a matrix with dependence values. Computes the contribution of each species to the overall nestedness.
 
 ```{r link level of each population}
-link_lev_mart<-linklevel(mart)
-link_lev_matas<-linklevel(matas)
+linklevel(mart)
+linklevel(matas)
 ```
 
 &nbsp;
