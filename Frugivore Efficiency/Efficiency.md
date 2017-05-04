@@ -59,7 +59,7 @@ networklevel(mart_e, index = c("connectance","web asymmetry","cluster coefficien
     ##            connectance          web asymmetry    cluster coefficient 
     ##              0.2878788             -0.5714286              0.1590909 
     ##             nestedness    weighted nestedness cluster.coefficient.HL 
-    ##             19.0786237              0.6402406              0.7525009 
+    ##             19.0742453              0.6446772              0.7525009 
     ## cluster.coefficient.LL 
     ##              0.3620076
 
@@ -71,7 +71,7 @@ networklevel(matas_e,index = c("connectance","web asymmetry","cluster coefficien
     ##            connectance          web asymmetry    cluster coefficient 
     ##              0.2647059             -0.6585366              0.2647059 
     ##             nestedness    weighted nestedness cluster.coefficient.HL 
-    ##             25.6257289              0.4756216              0.4226532 
+    ##             25.5979631              0.4716469              0.4226532 
     ## cluster.coefficient.LL 
     ##              0.3247715
 
@@ -324,7 +324,7 @@ networklevel(mart_matas_e, index = c("connectance","web asymmetry","cluster coef
     ##            connectance          web asymmetry    cluster coefficient 
     ##              0.2551020             -0.7777778              0.1964286 
     ##             nestedness    weighted nestedness cluster.coefficient.HL 
-    ##             30.5081558              0.3568852              0.4607005 
+    ##             30.2988034              0.3590506              0.4607005 
     ## cluster.coefficient.LL 
     ##              0.3129842
 
@@ -332,7 +332,7 @@ networklevel(mart_matas_e, index = c("connectance","web asymmetry","cluster coef
 
 Matasgordas y Martinazo
 
-    ## [1] 0.5487647
+    ## [1] 0.4418812
 
 ##### Ploting modules in the networks
 
@@ -872,5 +872,22 @@ LLspplvlmart$`lower level`[,c(2,3,7,10,17)]
     ## EM001H                        1.381818           1.657702
 
      
+
+#### **Step 6.** Interaction motifs.
+
+Interaction motifs
+==================
+
+Obtaining Median of non-zero interactions without unknown frugivores.
+=====================================================================
+
+mart\_matas\_e&lt;-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart\_matas\_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+martmat\_eNA&lt;-mart\_matas\_e martmat\_eNA\[martmat\_eNA==0\]&lt;-NA martmat\_eNA
+
+Median excluding NAs(e.g. 0). "The median for proportional frugivory efficiency (0.104)". All datas above this value will mean strong interaction and all below weak interaction
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+median(as.matrix(martmat\_eNA),na.rm=TRUE)
 
 [1] <span style="color:gray">For more information see previous analysis
