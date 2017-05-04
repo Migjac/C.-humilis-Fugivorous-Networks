@@ -131,7 +131,7 @@ Matasgordas
 ```{r Modularity value of Matasgordas, echo=FALSE}
 mod_matas@likelihood
 ```
-Modularity in Matasgordas is higher (0.43) than Martinazo (0.28)
+Modularity in Matasgordas is higher (0.375) than Martinazo (0.285)
 
 &nbsp;
 &nbsp;

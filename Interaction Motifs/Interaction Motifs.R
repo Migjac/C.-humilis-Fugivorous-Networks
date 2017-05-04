@@ -23,3 +23,4 @@ matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Netw
 summary(interaction_motifs)
 
 
+boxplot(interaction_motifs$plants,interaction_motifs$Motifs)
