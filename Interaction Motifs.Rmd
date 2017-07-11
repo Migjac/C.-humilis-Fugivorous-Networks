@@ -1,0 +1,202 @@
+---
+title: "Interaction Motifs"
+author: "Miguel Jacome"
+date: "10/7/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Matrixs with weighted interactions (frugivory efficiency), where the 0 were replaced by NAs to make the analysis over the true interactions.
+```{r Matrixs}
+#Martinazo
+marti<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/Matrixs/Marti.csv")
+martiNa<-marti
+martiNa[martiNa==0]<-NA
+
+#Matasgordas
+matas<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/Matrixs/Matas.csv")
+matasNa<-matas
+matasNa[matasNa==0]<-NA
+```
+
+#####*Median value of all interactions in the matrix.*
+We used the median values of both matrix to have the median strenght of intraction and have a reference point to classified our interaction motifs.
+
+```
+Martinazo: median(as.matrix(martiNa), na.rm=TRUE)
+
+Matasgordas: median(as.matrix(matasNa), na.rm=TRUE)
+```
+
+&nbsp;
+
+We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median value (`r median(as.matrix(martiNa), na.rm=TRUE)`) than in Matasgordas (`r median(as.matrix(matasNa), na.rm=TRUE)`) , perhps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.
+
+&nbsp;
+
+#Deer random matrix
+To find the standard error, we will create a huge matrix with 10000 rows (one for each bootstrap sample) and 500 columns (one for each sampled value, to match the original sample size).First create a large matrix to store all of the samples.
+```{r Deer randomization}
+B<-10000
+n<-nrow(matasNa)
+deer.samples<-matrix(sample(matasNa$deer, size=B*n, replace=TRUE), B, n)
+```
+
+```{r echo=FALSE, include=FALSE}
+deer.samples
+```
+To construct the confidence interval for the mean commute time in Atlanta, we need to find the
+point estimate (sample mean) from the original sample.
+
+&nbsp;
+
+```{r}
+deer.mean = with(matasNa, mean(matasNa$deer,na.rm = TRUE))
+deer.mean
+```
+
+
+deer.statistics <- apply(deer.samples, 1,median,na.rm = TRUE)
+deer.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = deer.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+deer.se<-sd(deer.statistics)
+deer.se
+barplot(deer.statistics)
+summary(deer.statistics)
+
+
+me<-ceiling(10 * 2 * deer.se)/10
+round(deer.mean,2) + c(-1, 1) * me
+```
+
+#Wildboar interative matrix
+B<-10000
+n<-nrow(matasNa)
+wildboar.samples<-matrix(sample(matasNa$wildboar, size=B*n, replace=TRUE), B, n)
+wildboar.samples
+matasNa$wildboar
+wildboar.mean = with(matasNa, mean(matasNa$wildboar,na.rm = TRUE))
+wildboar.mean
+
+
+
+wildboar.statistics <- apply(wildboar.samples, 1, median, na.rm = TRUE)
+wildboar.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = wildboar.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+wildboar.se<-sd(wildboar.statistics,na.rm = TRUE)
+wildboar.se
+barplot(wildboar.statistics)
+summary(wildboar.statistics)
+
+me<-ceiling(10 * 2 * wildboar.se)/10
+round(wildboar.mean,2) + c(-1, 1) * me
+
+#Rabbit interative matrix
+B<-10000
+n<-nrow(matasNa)
+rabbit.samples<-matrix(sample(matasNa$rabbit, size=B*n, replace=TRUE), B, n)
+rabbit.samples
+rabbit.mean = with(matasNa, mean(matasNa$rabbit,na.rm = TRUE))
+rabbit.mean
+
+rabbit.statistics <- apply(rabbit.samples, 1,median,na.rm = TRUE)
+rabbit.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = rabbit.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+rabbit.se<-sd(rabbit.statistics)
+rabbit.se
+barplot(rabbit.statistics)
+summary(rabbit.statistics)
+
+
+me<-ceiling(10 * 2 * rabbit.se)/10
+round(rabbit.mean,2) + c(-1, 1) * me
+
+#Rat interative matrix
+B<-10000
+n<-nrow(matasNa)
+rat.samples<-matrix(sample(matasNa$rat, size=B*n, replace=TRUE), B, n)
+rat.samples
+rat.mean = with(matasNa, mean(matasNa$rat,na.rm = TRUE))
+rat.mean
+
+rat.statistics <- apply(rat.samples, 1,median,na.rm = TRUE)
+rat.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = rat.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+rat.se<-sd(rat.statistics)
+rat.se
+barplot(rat.statistics)
+summary(rat.statistics)
+
+
+me<-ceiling(10 * 2 * rat.se)/10
+round(rat.mean,2) + c(-1, 1) * me
+
+#Badger interative matrix
+B<-10000
+n<-nrow(matasNa)
+badger.samples<-matrix(sample(matasNa$badger, size=B*n, replace=TRUE), B, n)
+badger.samples
+badger.mean = with(matasNa, mean(matasNa$badger,na.rm = TRUE))
+badger.mean
+
+badger.statistics <- apply(badger.samples, 1,median,na.rm = TRUE)
+badger.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = badger.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+badger.se<-sd(badger.statistics,na.rm = TRUE)
+badger.se
+barplot(badger.statistics)
+summary(badger.statistics)
+
+
+me<-ceiling(10 * 2 * badger.se)/10
+round(badger.mean,2) + c(-1, 1) * me
+
+#Fox interative matrix
+
+as.factor(matasNa$fox)
+B<-10000
+n<-nrow(matasNa)
+fox.samples<-matrix(sample(matasNa$fox, size=B*n, replace=TRUE), B, n)
+fox.samples
+fox.mean = with(matasNa, mean(matasNa$fox,na.rm = TRUE))
+fox.mean
+
+
+fox.statistics <- apply(fox.samples, 1,median,na.rm = TRUE)
+fox.statistics
+require(ggplot2)
+ggplot(data.frame(meanTime = fox.statistics),aes(x=meanTime)) +
+  geom_histogram(binwidth=0.5,aes(y=..density..)) +
+  geom_density(color="red")
+
+fox.se<-sd(fox.statistics,na.rm = TRUE)
+fox.se
+barplot(fox.statistics)
+summary(fox.statistics)
+
+
+me<-ceiling(10 * 2 * fox.se)/10
+round(fox.mean,2) + c(-1, 1) * me
