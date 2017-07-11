@@ -1,0 +1,79 @@
+---
+title: "Interaction_motifs_by_elena"
+author: "Elena Marmesat"
+date: "July 11, 2017"
+output: html_document
+---
+Queremos 
+
+#Charging libraries
+```{r}
+library(magrittr)
+library(dplyr)
+```
+
+#Settings. As Miguel wants to minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m)
+```{r}
+rabbit_dispersal_distance=1
+rat_dispersal_distance=0.1
+fox_dispersal_distance=2500
+badger_dispersal_distance=2500
+
+max_distance <- max (rabbit_dispersal_distance, rat_dispersal_distance, fox_dispersal_distance, badger_dispersal_distance)
+
+rabbit_correction_factor = rabbit_dispersal_distance / max_distance
+rat_correction_factor =  rat_dispersal_distance / max_distance
+fox_correction_factor =   fox_dispersal_distance / max_distance
+badger_correction_factor = badger_dispersal_distance / max_distance
+
+```
+
+
+```{r setup, include=FALSE}
+
+compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
+  
+  
+  counts <- mutate( my_matrix,
+    #Compute ant and mut effects
+    ant = deer + wildboar,
+    mut = (rabbit + rat ) + 
+          (fox    + badger ),
+    class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
+    class_mut = if_else( mut == 0, "absent", if_else( mut < median, "weak", if_else( mut >= median, "strong", "ERROR" ))),
+    combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
+    group_by(combination) %>%
+    summarise(count = n(),
+              freq  = count/n_row) %>%
+    mutate(iteration = iteration)
+  
+  return( counts )
+}
+    
+
+matrix_effects_resized <- read.csv("Marti.csv") %>%
+  mutate(
+    #Resize effects
+    rabbit = rabbit * rabbit_correction_factor,
+    rat = rat * rat_correction_factor,
+    fox = fox    * fox_correction_factor,
+    badger = badger * badger_correction_factor)
+
+matrix_effects_resized_NA <- matrix_effects_resized
+matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
+median <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
+n_row <- nrow(matrix_effects_resized)
+
+#Define boostrap_df 
+boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median, n_row)
+#Loop to generate the distribution
+for (iteration in seq (1,10) )
+{
+counts <- compute_per_category_count (as.data.frame(apply(matrix_effects_resized ,2,sample)), iteration, median, n_row)
+boostrap_df <- rbind(counts, boostrap_df)
+}
+
+
+
+```
+
