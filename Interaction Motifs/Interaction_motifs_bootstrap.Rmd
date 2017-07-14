@@ -1,18 +1,17 @@
 ---
-title: "Interaction_motifs_by_elena"
-author: "Elena Marmesat"
+title: "Interaction motifs bootstrap"
+author: "EMarmesat and modified by MJacome"
 date: "July 11, 2017"
 output: html_document
 ---
-Queremos 
 
-#Charging libraries
+Charging libraries
 ```{r}
 library(magrittr)
 library(dplyr)
 ```
 
-#Settings. As Miguel wants to minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m)
+Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m)
 ```{r}
 rabbit_dispersal_distance=1
 rat_dispersal_distance=0.1
@@ -28,9 +27,28 @@ badger_correction_factor = badger_dispersal_distance / max_distance
 
 ```
 
+*Creating a function for the iteration results.
+*Classifying the interaction strenghts of mutualist and antagonists based on the interaction strength median and the frequency of the interaction motifs
 
 ```{r setup, include=FALSE}
 
+matrix_effects_resized <- read.csv("Matas.csv") %>%
+  mutate(
+    #Resize effects
+    rabbit = rabbit * rabbit_correction_factor,
+    rat = rat * rat_correction_factor,
+    fox = fox    * fox_correction_factor,
+    badger = badger * badger_correction_factor)
+
+matrix_effects_resized_NA <- matrix_effects_resized
+matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
+median <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
+n_row <- nrow(matrix_effects_resized)
+
+my_matrix<-matrix_effects_resized
+```
+
+```{r}
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   
   
@@ -49,31 +67,59 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   
   return( counts )
 }
-    
+```
 
-matrix_effects_resized <- read.csv("Marti.csv") %>%
-  mutate(
-    #Resize effects
-    rabbit = rabbit * rabbit_correction_factor,
-    rat = rat * rat_correction_factor,
-    fox = fox    * fox_correction_factor,
-    badger = badger * badger_correction_factor)
 
-matrix_effects_resized_NA <- matrix_effects_resized
-matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
-median <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
-n_row <- nrow(matrix_effects_resized)
-
+```{r}
 #Define boostrap_df 
 boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median, n_row)
 #Loop to generate the distribution
-for (iteration in seq (1,10) )
+for (iteration in seq (1,10000) )
 {
 counts <- compute_per_category_count (as.data.frame(apply(matrix_effects_resized ,2,sample)), iteration, median, n_row)
 boostrap_df <- rbind(counts, boostrap_df)
 }
 
+```
+
+```{r}
+write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_mart.csv")
+```
+
+```{r}
+mart_im<-read.csv("boostrap_mart.csv")
+str(mart_im)
+
+
+boxplot(mart_im$count~mart_im$combination,data=mart_im, main="interaction motifs", 
+  	xlab="Interaction motifs", ylab="frequency")
+
+#Without absents
+mart_abs<-subset(mart_im, combination != "ant-absent_mut-absent", select=c(combination,count, freq))
+boxplot(mart_abs$count~mart_abs$combination,data=mart_abs, main="interaction motifs", 
+  	xlab="Interaction motifs", ylab="frequency")
 
 
 ```
 
+
+
+```{r}
+write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_matas.csv")
+```
+
+```{r}
+matas_im<-read.csv("boostrap_matas.csv")
+str(matas_im)
+
+
+boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction motifs", 
+  	xlab="Interaction motifs", ylab="frequency")
+
+#Without absents
+matas_abs<-subset(matas_im, combination != "ant-absent_mut-absent", select=c(combination,count, freq))
+boxplot(matas_abs$count~matas_abs$combination,data=matas_abs, main="interaction motifs", 
+  	xlab="Interaction motifs", ylab="frequency")
+
+
+```
