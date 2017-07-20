@@ -11,7 +11,13 @@ library(magrittr)
 library(dplyr)
 ```
 
-Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m)
+Matrix
+```{r}
+matrix_effects_resized <- read.csv("Marti.csv")
+```
+
+
+Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m). The dispersal service was measured as the distance of seed deposition by each specie. The wildboars and deers where exclude because they are seed predators.
 ```{r}
 rabbit_dispersal_distance=1
 rat_dispersal_distance=0.1
@@ -27,13 +33,11 @@ badger_correction_factor = badger_dispersal_distance / max_distance
 
 ```
 
-*Creating a function for the iteration results.
-*Classifying the interaction strenghts of mutualist and antagonists based on the interaction strength median and the frequency of the interaction motifs
 
+Matrix resized by dispersal ditances, and adding NA to obtain the median of non-zero interaction values
 ```{r setup, include=FALSE}
-
-matrix_effects_resized <- read.csv("Matas.csv") %>%
-  mutate(
+matrix_effects_resized <- read.csv("Marti.csv") %>%  
+mutate(
     #Resize effects
     rabbit = rabbit * rabbit_correction_factor,
     rat = rat * rat_correction_factor,
@@ -48,6 +52,7 @@ n_row <- nrow(matrix_effects_resized)
 my_matrix<-matrix_effects_resized
 ```
 
+Creating a function for the iteration results given the median. Creating a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox.
 ```{r}
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   
@@ -70,6 +75,7 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
 ```
 
 
+Creating a resample with the frequency of each typology based on the created function
 ```{r}
 #Define boostrap_df 
 boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median, n_row)
@@ -86,6 +92,8 @@ boostrap_df <- rbind(counts, boostrap_df)
 write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_mart.csv")
 ```
 
+
+Boxplot for the frequencies of interaction typologies for Martinazo
 ```{r}
 mart_im<-read.csv("boostrap_mart.csv")
 str(mart_im)
@@ -102,11 +110,11 @@ boxplot(mart_abs$count~mart_abs$combination,data=mart_abs, main="interaction mot
 
 ```
 
-
-
+Reorganizing the tupologies into columns Martinazo
 ```{r}
-write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_matas.csv")
+bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
 ```
+
 
 ```{r}
 matas_im<-read.csv("boostrap_matas.csv")
@@ -123,3 +131,25 @@ boxplot(matas_abs$count~matas_abs$combination,data=matas_abs, main="interaction 
 
 
 ```
+
+Reorganizing the tupologies into columns Matasgordas
+```{r}
+library(tidyr)
+bs_matas<-select (matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
+```
+
+```{r}
+absent<-z.test(bs_matas$`ant-absent_mut-absent`, mu= mean(bs_matas$`ant-absent_mut-absent`), sd= sd(bs_matas$`ant-absent_mut-absent`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-absent`), conf.level = 0.95)
+
+antw_mutstrong<-z.test(bs_matas$`ant-absent_mut-strong`, mu= mean(bs_matas$`ant-absent_mut-strong`), sd= sd(bs_matas$`ant-absent_mut-strong`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-strong`))
+
+antabs_mutweak<-z.test(bs_matas$`ant-absent_mut-weak`, mu= mean(bs_matas$`ant-absent_mut-weak`), sd= sd(bs_matas$`ant-absent_mut-weak`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-weak`))
+
+ants_mutabsent<-z.test(bs_matas$`ant-strong_mut-absent`, mu= mean(bs_matas$`ant-strong_mut-absent`), sd= sd(bs_matas$`ant-strong_mut-absent`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-absent`))
+
+ants_mutstrong<-z.test(bs_matas$`ant-strong_mut-strong`, mu= mean(bs_matas$`ant-strong_mut-strong`), sd= sd(bs_matas$`ant-strong_mut-strong`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-strong`))
+
+ants_mutweak<-z.test(bs_matas$`ant-strong_mut-weak`, mu= mean(bs_matas$`ant-strong_mut-weak`), sd= sd(bs_matas$`ant-strong_mut-weak`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-weak`))
+
+```
+

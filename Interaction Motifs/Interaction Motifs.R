@@ -20,11 +20,6 @@ mart_mat<-read.csv("~/Desktop/red_miguel.csv",header=TRUE,check.names=FALSE,row.
 matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
-summary(interaction_motifs)
-
-
-boxplot(interaction_motifs$plants,interaction_motifs$Motifs)
-
 
 
 matas<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/Matrixs/Matas.csv")
@@ -193,20 +188,10 @@ round(fox.mean,2) + c(-1, 1) * me
 
 
 
+boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction motifs", 
+        xlab="Interaction motifs", ylab="frequency")
 
-
-
-
-marti<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/Matrixs/Marti.csv")
-martiNa<-marti
-martiNa[martiNa==0]<-NA
-martiNa
-str(marti)
-summary(marti)
-
-martNA<-median(as.matrix(martiNa), na.rm=TRUE)
-martNA
-
-
-
-median(as.matrix(martiNa),na.rm=TRUE)
+#Without absents
+matas_abs<-subset(matas_im, combination != "ant-absent_mut-absent", select=c(combination,count, freq))
+boxplot(matas_abs$count~matas_abs$combination,data=matas_abs, main="interaction motifs", 
+        xlab="Interaction motifs", ylab="frequency")

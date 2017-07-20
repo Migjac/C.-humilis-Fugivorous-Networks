@@ -31,4 +31,9 @@ mod_matas_enun@likelihood
 linklevel(mart_enun)
 linklevel(matas_enun)
 
+mart_im<-read.csv("boostrap_mart.csv")
+str(mart_im)
 
+
+boxplot(mart_im$count~mart_im$combination,data=mart_im, main="interaction motifs", 
+        xlab="Interaction motifs", ylab="frequency")
