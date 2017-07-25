@@ -119,16 +119,12 @@ boxplot(marti_matas_im$count~marti_matas_im$combination,data=marti_matas_im, mai
 
 Reorganizing the typologies into columns to analyze the significance of each typology given the expected and observed data
 ```{r}
+
+#Martinazo
 bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
 
 bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
-```
 
-
-
-
-Reorganizing the typologies into columns Martinazo
-```{r}
 bs_marti_matas<-select (marti_matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
 
 write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas.csv")
@@ -137,6 +133,8 @@ write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Netw
 
 
 
+
+Creating matrix of the observed and expected data
 ```{r}
 #"Excluding" the first row, that contain the "observed data" (row 10001)
 bs_mar_mat_expected<-bs_marti_matas[-c(10001), ]
@@ -151,7 +149,7 @@ bs3<-data.matrix(bs2)
 bs3_mean<-apply(bs3,2,mean)
 bs3_sd<-apply(bs3,2,sd)
 
-#funciton to add dev. standard
+#function to add dev. standard
 error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
 stop("vectors must be same length")
@@ -236,68 +234,58 @@ t.test(bs2$`ant-weak_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-weak_m
 #alternative hypothesis: true mean is not equal to 1
 # 1.032149 1.066251
 #mean of x: 1.0492 
+```
 
 
-###################Using GGplot#################################
-
+#Using GGplot to graph all the motifs
+```{r}
 ###Expected graph
 #Creating long shape with the means of each motif
-means.long<-melt(bs3_mean,id.vars="Int_motif")
+expect_data<-melt(bs3_mean,id.vars="Int_motif")
 
 #naming the first column to perform the first ggplot
-means.long <- add_rownames(means.long, "variable")
+expect_data <- add_rownames(expect_data, "variable")
 
-#ggplot of the expected frequencies of the motifs (without stand. errors)
-exp2<-ggplot(means.long,aes(x=variable,y=value))+
-  geom_bar(stat="identity",position="dodge")+
-  scale_fill_discrete(name="Motifs")+ xlab("Motifs")+ylab("Frequency")+stat_summary(fun.y=mean, geom="bar",position=position_dodge(1)) + 
-  stat_summary(fun.ymin=min,fun.ymax=max, geom = "Standard deviation",
-               color="grey40",position=position_dodge(1), width=.2)
-
-
-means.long<-melt(bs3_mean,id.vars="Int_motif")
-means.long <- add_rownames(means.long, "variable")
-means.long["Data"]<-NA
-means.long$Data<-"Expected"
-means.long["SD"]<-NA
-means.long$SD<-bs3_sd
+#Expected data
+expect_data<-melt(bs3_mean,id.vars="Int_motif")
+expect_data <- add_rownames(expect_data, "variable")
+expect_data["Data"]<-NA          #adding a new column for data type
+expect_data$Data<-"Expected"     
+expect_data["SD"]<-NA  #adding a new column for standard deviation
+expect_data$SD<-bs3_sd #adding the values of standard deviation
 
 
 
-###Observed graph
-
+###Observed data
 obs_data<-melt(bs_o,id.vars="Int_motif")
 obs_data<-melt(bs_o,id.vars="Int_motif")
 obs_data<-subset(obs_data [,-1])
 colnames(obs_data)<-c("variable", "value")
-obs_data["Data"]<-NA
-obs_data$Data<-"1Observed"
-obs_data["SD"]<-NA
+obs_data["Data"]<-NA        #adding a new column for data type
+obs_data$Data<-"1Observed" 
+obs_data["SD"]<-NA     #adding a new column for standard deviation
 
 
-total<-rbind(obs_data,means.long)
+total<-rbind(obs_data,expect_data)
 
 
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-absent"]<-"Absent"
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-strong"]<-"Strong Mutualism"
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-weak"]<-"Weak Mutualism"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-absent"]<-"Strong Antagonism"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-strong"]<-"Strong Mutualism / Strong Antagonism"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-weak"]<-"Weak Mutualism / Strong Antagonism"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-absent"]<-"Weak Antagonism"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-strong"]<-"Strong Mutualism / Weak Antagonism"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-weak"]<-"Weak Mutualism / Weak Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-absent"]<-"Abs"
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-strong"]<-"S-Mutualism"
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-weak"]<-"W-Mutualism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-absent"]<-"S-Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-strong"]<-"S-Mutualism / S-Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-weak"]<-"W-Mutualism / S-Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-absent"]<-"W-Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-strong"]<-"S-Mutualism / W-Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-weak"]<-"W-Mutualism / W-Antagonism"
 
 #ggplot of the observed frequencies of the motifs 
-
-label.plot<-data.frame(variable=c("Absent", "Strong Mutualism", "Weak Mutualism","Strong Mutualism / Weak Antagonism", "Strong Mutualism / Strong Antagonism", "Weak Mutualism / Weak Antagonism","Weak Mutualism / Strong Antagonism","Weak Antagonism", "Strong Antagonism"), value= c(17,3,15))
-
 ggplot(total,aes(x=variable,y=value, fill=Data))+
-  geom_bar(stat="identity",position="dodge", colour="black", stroke=0.01)+
-  scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+
+  geom_bar(stat="identity",position="dodge", colour="black")+
+  scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,18, 2))+
   geom_errorbar(aes(ymin=value-SD, ymax=value+SD),
                   width=.2,                    # Width of the error bars
-                  position=position_dodge(.9))+scale_x_discrete(limits= c("Absent", "Strong Mutualism", "Weak Mutualism","Strong Mutualism / Weak Antagonism", "Strong Mutualism / Strong Antagonism", "Weak Mutualism / Weak Antagonism","Weak Mutualism / Strong Antagonism","Weak Antagonism", "Strong Antagonism"))+ theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ theme(
+                  position=position_dodge(.9))+scale_x_discrete(limits= c("Abs", "S-Mutualism", "W-Mutualism","S-Mutualism / W-Antagonism", "S-Mutualism / S-Antagonism", "W-Mutualism / W-Antagonism","W-Mutualism / S-Antagonism","W-Antagonism", "S-Antagonism"))+ theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ theme(
                     panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
                                    colour = "black"))
 
