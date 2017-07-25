@@ -9,34 +9,36 @@ Charging libraries
 ```{r}
 library(magrittr)
 library(dplyr)
+library(reshape2)
+library(tidyr)
 ```
 
 Matrix
 ```{r}
-matrix_effects_resized <- read.csv("Marti.csv")
+matrix_effects_resized <- read.csv("Marti_matas.csv")
 ```
 
 
-Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less (distances in m). The dispersal service was measured as the distance of seed deposition by each specie. The wildboars and deers where exclude because they are seed predators.
+Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less. The dispersal capacity was measured as the average weight of each mutualist, due to the seed dispersal distance is highly correlated with the body mass. The wildboars and deers where exclude because they are seed predators.
 ```{r}
-rabbit_dispersal_distance=1
-rat_dispersal_distance=0.1
-fox_dispersal_distance=2500
-badger_dispersal_distance=2500
+rabbit_weight=1164
+rat_weight=71
+fox_weight=6000
+badger_weight=6500
 
-max_distance <- max (rabbit_dispersal_distance, rat_dispersal_distance, fox_dispersal_distance, badger_dispersal_distance)
+max_weight <- max (rabbit_weight, rat_weight, fox_weight, badger_weight)
 
-rabbit_correction_factor = rabbit_dispersal_distance / max_distance
-rat_correction_factor =  rat_dispersal_distance / max_distance
-fox_correction_factor =   fox_dispersal_distance / max_distance
-badger_correction_factor = badger_dispersal_distance / max_distance
+rabbit_correction_factor = rabbit_weight / max_weight
+rat_correction_factor =  rat_weight / max_weight
+fox_correction_factor =   fox_weight / max_weight
+badger_correction_factor = badger_weight / max_weight
 
 ```
 
 
-Matrix resized by dispersal ditances, and adding NA to obtain the median of non-zero interaction values
+Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
 ```{r setup, include=FALSE}
-matrix_effects_resized <- read.csv("Marti.csv") %>%  
+matrix_effects_resized <- read.csv("Marti_matas.csv") %>%  
 mutate(
     #Resize effects
     rabbit = rabbit * rabbit_correction_factor,
@@ -77,7 +79,7 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
 
 Creating a resample with the frequency of each typology based on the created function
 ```{r}
-#Define boostrap_df 
+#Define boostrap_df. We obtained the number of plants in eahc typology
 boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median, n_row)
 #Loop to generate the distribution
 for (iteration in seq (1,10000) )
@@ -89,67 +91,217 @@ boostrap_df <- rbind(counts, boostrap_df)
 ```
 
 ```{r}
-write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_mart.csv")
+write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_marti_matas.csv")
 ```
 
 
-Boxplot for the frequencies of interaction typologies for Martinazo
+Boxplot for the frequencies of interaction typologies for both populations
 ```{r}
+#Martinazo
 mart_im<-read.csv("boostrap_mart.csv")
-str(mart_im)
-
 
 boxplot(mart_im$count~mart_im$combination,data=mart_im, main="interaction motifs", 
   	xlab="Interaction motifs", ylab="frequency")
 
-#Without absents
-mart_abs<-subset(mart_im, combination != "ant-absent_mut-absent", select=c(combination,count, freq))
-boxplot(mart_abs$count~mart_abs$combination,data=mart_abs, main="interaction motifs", 
-  	xlab="Interaction motifs", ylab="frequency")
-
-
-```
-
-Reorganizing the tupologies into columns Martinazo
-```{r}
-bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
-```
-
-
-```{r}
+#Matasgordas
 matas_im<-read.csv("boostrap_matas.csv")
-str(matas_im)
-
 
 boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction motifs", 
   	xlab="Interaction motifs", ylab="frequency")
 
-#Without absents
-matas_abs<-subset(matas_im, combination != "ant-absent_mut-absent", select=c(combination,count, freq))
-boxplot(matas_abs$count~matas_abs$combination,data=matas_abs, main="interaction motifs", 
+#Both Population
+marti_matas_im<-read.csv("boostrap_marti_matas.csv")
+
+boxplot(marti_matas_im$count~marti_matas_im$combination,data=marti_matas_im, main="interaction motifs", 
   	xlab="Interaction motifs", ylab="frequency")
-
-
 ```
 
-Reorganizing the tupologies into columns Matasgordas
+
+Reorganizing the typologies into columns to analyze the significance of each typology given the expected and observed data
 ```{r}
-library(tidyr)
-bs_matas<-select (matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
+bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
+
+bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
 ```
+
+
+
+
+Reorganizing the typologies into columns Martinazo
+```{r}
+bs_marti_matas<-select (marti_matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
+
+write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas.csv")
+
+```
+
+
 
 ```{r}
-absent<-z.test(bs_matas$`ant-absent_mut-absent`, mu= mean(bs_matas$`ant-absent_mut-absent`), sd= sd(bs_matas$`ant-absent_mut-absent`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-absent`), conf.level = 0.95)
+#"Excluding" the first row, that contain the "observed data" (row 10001)
+bs_mar_mat_expected<-bs_marti_matas[-c(10001), ]
 
-antw_mutstrong<-z.test(bs_matas$`ant-absent_mut-strong`, mu= mean(bs_matas$`ant-absent_mut-strong`), sd= sd(bs_matas$`ant-absent_mut-strong`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-strong`))
+#Without column iteration
+bs2<-subset(bs_mar_mat_expected[,-1])
 
-antabs_mutweak<-z.test(bs_matas$`ant-absent_mut-weak`, mu= mean(bs_matas$`ant-absent_mut-weak`), sd= sd(bs_matas$`ant-absent_mut-weak`), alternative = c("two.sided"), n=length(bs_matas$`ant-absent_mut-weak`))
+#convert data.frame to matrix
+bs3<-data.matrix(bs2)
 
-ants_mutabsent<-z.test(bs_matas$`ant-strong_mut-absent`, mu= mean(bs_matas$`ant-strong_mut-absent`), sd= sd(bs_matas$`ant-strong_mut-absent`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-absent`))
+#mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+bs3_mean<-apply(bs3,2,mean)
+bs3_sd<-apply(bs3,2,sd)
 
-ants_mutstrong<-z.test(bs_matas$`ant-strong_mut-strong`, mu= mean(bs_matas$`ant-strong_mut-strong`), sd= sd(bs_matas$`ant-strong_mut-strong`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-strong`))
+#funciton to add dev. standard
+error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
+if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
+stop("vectors must be same length")
+arrows(x,y+upper, x, y-lower, angle=90, code=3, length=length, ...)
+}
 
-ants_mutweak<-z.test(bs_matas$`ant-strong_mut-weak`, mu= mean(bs_matas$`ant-strong_mut-weak`), sd= sd(bs_matas$`ant-strong_mut-weak`), alternative = c("two.sided"), n=length(bs_matas$`ant-strong_mut-weak`))
+#Bar plot with means and with the stnd. deviation
+bar_ex<-barplot(bs3_mean, ylim= c(0, 20), col = "gray", axis.lty=1, xlab="Interaction Motifs", ylab="Frequency")
+error.bar(bar_ex,bs3_mean,bs3_sd)
+
+#Observed data
+bs_mar_mat_observed<-bs_marti_matas[c(10001), ]
+bs_obs<-subset(bs_mar_mat_observed[,-1])
+bs_o<-data.matrix(bs_obs)
+
+bar_ob<-barplot(bs_o, ylim= c(0, 20), col = "gray", axis.lty=1, xlab="Interaction Motifs", ylab="Frequency", add = TRUE)
+
+
+
+#T test for each motif
+
+#MOTIF 1
+t.test(bs2$`ant-absent_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-absent`, conf.level = 0.95)
+#t = -74.868, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 17
+# 15.16385 15.25755
+#mean of x:  15.2107 
+
+#
+t.test(bs2$`ant-absent_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-strong`, conf.level = 0.95)
+#"t = 153.95, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 3
+# 5.434304 5.497096
+#mean of x: 5.4657
+
+#MOTIF 2
+t.test(bs2$`ant-absent_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-weak`, conf.level = 0.95)
+#t = -120.81, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 15
+# 12.16839 12.25881
+#mean of x:  12.2136 
+
+#MOTIF 3
+t.test(bs2$`ant-strong_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-absent`, conf.level = 0.95)
+#t = -44.534, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 17
+# 15.87309 15.96811
+# mean of x:15.9206 
+
+
+#MOTIF 4
+t.test(bs2$`ant-strong_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-strong`, conf.level = 0.95)
+#t = -142.58, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 8
+#5.680646 5.743554
+#mean of x: 5.7121 
+
+#
+t.test(bs2$`ant-strong_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-weak`, conf.level = 0.95)
+#t = 287.56, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 6
+# 12.63407 12.72513
+#mean of x: 12.6796 
+
+#MOTIF 5
+t.test(bs2$`ant-weak_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-absent`, conf.level = 0.95)
+#t = -77.526, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 2
+# 1.267332 1.303468
+#mean of x:  1.2854 
+
+#MOTIF 6
+t.test(bs2$`ant-weak_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-strong`, conf.level = 0.95)
+#t = -85.332, df = 9999, p-value < 2.2e-16
+#alternative hypothesis: true mean is not equal to 1
+#0.4507666 0.4754334
+#mean of x: 0.4631 
+
+
+t.test(bs2$`ant-weak_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-weak`, conf.level = 0.95)
+#t = 5.6561, df = 9999, p-value = 1.591e-08
+#alternative hypothesis: true mean is not equal to 1
+# 1.032149 1.066251
+#mean of x: 1.0492 
+
+
+###################Using GGplot#################################
+
+###Expected graph
+#Creating long shape with the means of each motif
+means.long<-melt(bs3_mean,id.vars="Int_motif")
+
+#naming the first column to perform the first ggplot
+means.long <- add_rownames(means.long, "variable")
+
+#ggplot of the expected frequencies of the motifs (without stand. errors)
+exp2<-ggplot(means.long,aes(x=variable,y=value))+
+  geom_bar(stat="identity",position="dodge")+
+  scale_fill_discrete(name="Motifs")+ xlab("Motifs")+ylab("Frequency")+stat_summary(fun.y=mean, geom="bar",position=position_dodge(1)) + 
+  stat_summary(fun.ymin=min,fun.ymax=max, geom = "Standard deviation",
+               color="grey40",position=position_dodge(1), width=.2)
+
+
+means.long<-melt(bs3_mean,id.vars="Int_motif")
+means.long <- add_rownames(means.long, "variable")
+means.long["Data"]<-NA
+means.long$Data<-"Expected"
+means.long["SD"]<-NA
+means.long$SD<-bs3_sd
+
+
+
+###Observed graph
+
+obs_data<-melt(bs_o,id.vars="Int_motif")
+obs_data<-melt(bs_o,id.vars="Int_motif")
+obs_data<-subset(obs_data [,-1])
+colnames(obs_data)<-c("variable", "value")
+obs_data["Data"]<-NA
+obs_data$Data<-"1Observed"
+obs_data["SD"]<-NA
+
+
+total<-rbind(obs_data,means.long)
+
+
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-absent"]<-"Absent"
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-strong"]<-"Strong Mutualism"
+levels(total$variable)[levels(total$variable)=="ant-absent_mut-weak"]<-"Weak Mutualism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-absent"]<-"Strong Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-strong"]<-"Strong Mutualism / Strong Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-strong_mut-weak"]<-"Weak Mutualism / Strong Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-absent"]<-"Weak Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-strong"]<-"Strong Mutualism / Weak Antagonism"
+levels(total$variable)[levels(total$variable)=="ant-weak_mut-weak"]<-"Weak Mutualism / Weak Antagonism"
+
+#ggplot of the observed frequencies of the motifs 
+
+label.plot<-data.frame(variable=c("Absent", "Strong Mutualism", "Weak Mutualism","Strong Mutualism / Weak Antagonism", "Strong Mutualism / Strong Antagonism", "Weak Mutualism / Weak Antagonism","Weak Mutualism / Strong Antagonism","Weak Antagonism", "Strong Antagonism"), value= c(17,3,15))
+
+ggplot(total,aes(x=variable,y=value, fill=Data))+
+  geom_bar(stat="identity",position="dodge", colour="black", stroke=0.01)+
+  scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+
+  geom_errorbar(aes(ymin=value-SD, ymax=value+SD),
+                  width=.2,                    # Width of the error bars
+                  position=position_dodge(.9))+scale_x_discrete(limits= c("Absent", "Strong Mutualism", "Weak Mutualism","Strong Mutualism / Weak Antagonism", "Strong Mutualism / Strong Antagonism", "Weak Mutualism / Weak Antagonism","Weak Mutualism / Strong Antagonism","Weak Antagonism", "Strong Antagonism"))+ theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ theme(
+                    panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
+                                   colour = "black"))
+
 
 ```
+
 
