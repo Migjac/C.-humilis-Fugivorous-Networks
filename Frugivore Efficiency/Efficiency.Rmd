@@ -100,6 +100,53 @@ Modularity in Matasgordas bigger (0.5641114) than Martinazo (0.1928246)
 
 &nbsp;
 &nbsp;
+#####Modularity significance analysis
+Batch to generate the null models for modularity M significance test.
+```{r}
+mat<-mart_e
+res <- computeModules(mat)
+nulls <- nullmodel(mat, N=100, method=3)
+modules.nulls <- sapply(nulls, computeModules)
+like.nulls <- sapply(modules.nulls, function(x) x@likelihood)
+z <- (res@likelihood - mean(like.nulls))/sd(like.nulls)
+p <- 2*pnorm(-abs(z))
+cat(p," ")
+
+
+# Modularity for observed matrix.
+#Martinazo
+mod_mart<-0.1928246
+
+#Matasgordas
+mod_matas<-0.5641114
+
+
+
+Msig <- function (mat, mlike)  {
+    require(bipartite)
+    # mat is the input matrix for which M is tested
+    # mlike is the observed mean M value
+    nulls <- nullmodel(mat, N=100, method=3)
+    modules.nulls <- sapply(nulls, computeModules)
+    like.nulls <- sapply(modules.nulls, function(x) x@likelihood)
+    z <- (mlike - mean(like.nulls))/sd(like.nulls)
+    p <- 2*pnorm(-abs(z))
+    cat("\n\n","P value for modularity M= ", mlike, "\n", 
+        "No. resamplings= ", N, "\n",
+        "P=  ",p)
+} 
+
+
+# Give here the mean observed modularity values.
+#Martinazo
+Msig(mart_e, mod_mart) # P=   4.88301e-28
+#Matasgordas
+Msig(matas_e, mod_matas) #P=   1.212893e-67
+
+
+```
+
+
 
 #####Ploting modules in the networks
 
@@ -173,6 +220,9 @@ spplvlmatas$`higher level`[,c(2,3,8,10)]
 LLspplvlmatas<-specieslevel(matas_e)
 LLspplvlmatas$`lower level`[,c(2,3,7,10,17)]
 ```
+
+
+
 
 &nbsp;
 ####**Step 6.** Gathering Martinazo and Matasgordas' matrixs as one; plants are ordered from more to less aggregated
@@ -281,18 +331,6 @@ LLspplvlmart$`lower level`[,c(2,3,7,10,17)]
 &nbsp;
 
 
-####**Step 6.** Interaction motifs.
-
-#Interaction motifs
-
-#Obtaining Median of non-zero interactions without unknown frugivores. 
-mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
-martmat_eNA<-mart_matas_e
-martmat_eNA[martmat_eNA==0]<-NA
-martmat_eNA
-
-##Median excluding NAs(e.g. 0). "The median for proportional frugivory efficiency (0.104)". All datas above this value will mean strong interaction and all below weak interaction
-median(as.matrix(martmat_eNA),na.rm=TRUE)
 
