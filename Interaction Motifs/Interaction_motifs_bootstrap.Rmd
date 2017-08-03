@@ -1,6 +1,5 @@
 ---
 title: "Interaction motifs bootstrap"
-author: "EMarmesat and modified by MJacome"
 date: "July 11, 2017"
 output: html_document
 ---
