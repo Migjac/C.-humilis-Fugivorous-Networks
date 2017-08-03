@@ -91,6 +91,9 @@ boostrap_df <- rbind(counts, boostrap_df)
 
 ```
 
+We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas  , perhps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.
+
+
 ```{r}
 write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/boostrap_marti_matas.csv")
 ```
