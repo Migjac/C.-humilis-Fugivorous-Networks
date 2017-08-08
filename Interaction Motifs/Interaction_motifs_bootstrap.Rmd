@@ -369,4 +369,11 @@ ggplot(total,aes(x=variable,y=value, fill=Data))+
 
 ```
 
+###Creating a new classification for logistic regression analysis
+```{r}
+im_glm <- read_csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm.csv")
+im_lreg <- mutate(im_glm,
+    #Compute ant and mut effects
+    new_class = if_else( combination == "ant-absent_mut-absent","Absent", if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism", if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism", if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" ))))))))))
+```
 
