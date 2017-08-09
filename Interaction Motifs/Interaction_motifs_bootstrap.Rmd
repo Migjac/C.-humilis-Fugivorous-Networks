@@ -137,8 +137,6 @@ write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Netw
 ```
 
 
-
-
 Creating matrix of the observed and expected data
 ```{r}
 #"Excluding" the first row, that contain the "observed data" (row 10001)
@@ -174,21 +172,14 @@ bar_ob<-barplot(bs_o, ylim= c(0, 20), col = "gray", axis.lty=1, xlab="Interactio
 
 
 
-#T test for each motif
-
-#ABSENT
-t.test(bs2$`ant-absent_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-absent`, conf.level = 0.95)
-#t = -74.868, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 17
-# 15.16385 15.25755
-#mean of x:  15.2107 
-
+#Z test for each motif
 
 alpha = .05 
 z.half.alpha = qnorm(1-alpha/2) 
 c(-z.half.alpha, z.half.alpha) 
 #[1] -1.959964  1.959964
 
+#ABSENT
 z.abs <- (bs_obs$`ant-absent_mut-absent` - mean(bs2$`ant-absent_mut-absent`))/sd(bs2$`ant-absent_mut-absent`) #0.7486757
 # Lower 1−tailed test:
 pnorm(z.abs, lower.tail=T) #p-value: 0.7729737
@@ -197,12 +188,6 @@ pnorm(z.abs, lower.tail=F) #p−value: 0.2270263
 #Random pattern
 
 #STRONG MUTUALISM
-t.test(bs2$`ant-absent_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-strong`, conf.level = 0.95)
-#"t = 153.95, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 3
-# 5.434304 5.497096
-#mean of x: 5.4657
-
 z.mstrong <- (bs_obs$`ant-absent_mut-strong` - mean(bs2$`ant-absent_mut-strong`))/sd(bs2$`ant-absent_mut-strong`) #-1.539476
 # Lower 1−tailed test:
 pnorm(z.mstrong, lower.tail=T) #p-value: 0.0618441
@@ -212,12 +197,6 @@ pnorm(z.mstrong, lower.tail=F) #p−value: 0.9381559
 
 
 #WEAK MUTUALISM
-t.test(bs2$`ant-absent_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-absent_mut-weak`, conf.level = 0.95)
-#t = -120.81, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 15
-# 12.16839 12.25881
-#mean of x:  12.2136 
-
 z.mweak <- (bs_obs$`ant-absent_mut-weak` - mean(bs2$`ant-absent_mut-weak`))/sd(bs2$`ant-absent_mut-weak`) #1.208068
 # Lower 1−tailed test:
 pnorm(z.mweak, lower.tail=T) #p-value: 0.8864895
@@ -226,12 +205,6 @@ pnorm(z.mweak, lower.tail=F) #p−value: 0.1135105
 #Random pattern
 
 #STRONG ANTAGONISM
-t.test(bs2$`ant-strong_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-absent`, conf.level = 0.95)
-#t = -44.534, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 17
-# 15.87309 15.96811
-# mean of x:15.9206 
-
 z.astrong <- (bs_obs$`ant-strong_mut-absent` - mean(bs2$`ant-strong_mut-absent`))/sd(bs2$`ant-strong_mut-absent`) #0.4453384
 # Lower 1−tailed test:
 pnorm(z.astrong, lower.tail=T) #p-value: 0.6719624
@@ -241,12 +214,6 @@ pnorm(z.astrong, lower.tail=F) #p−value: 0.3280376
 
 
 #STRONG MUTUALISM - STRONG ANTAGONISM
-t.test(bs2$`ant-strong_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-strong`, conf.level = 0.95)
-#t = -142.58, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 8
-#5.680646 5.743554
-#mean of x: 5.7121 
-
 z.mastrong <- (bs_obs$`ant-strong_mut-strong` - mean(bs2$`ant-strong_mut-strong`))/sd(bs2$`ant-strong_mut-strong`) #1.425802
 # Lower 1−tailed test:
 pnorm(z.mastrong, lower.tail=T) #p-value: 0.9230373
@@ -255,12 +222,6 @@ pnorm(z.mastrong, lower.tail=F) #p−value: 0.07696272
 #Marginally more frequent than expected
 
 #WEAK MUTUALISM-STRONG ANTAGONISM
-t.test(bs2$`ant-strong_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-strong_mut-weak`, conf.level = 0.95)
-#t = 287.56, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 6
-# 12.63407 12.72513
-#mean of x: 12.6796 
-
 z.mweak_astrong <- (bs_obs$`ant-strong_mut-weak` - mean(bs2$`ant-strong_mut-weak`))/sd(bs2$`ant-strong_mut-weak`) #-2.875645
 # Lower 1−tailed test:
 pnorm(z.mweak_astrong, lower.tail=T) #p-value: 0.002016014
@@ -270,12 +231,6 @@ pnorm(z.mweak_astrong, lower.tail=F) #p−value: 0.997984
 
 
 #WEAK ANTAGONISM
-t.test(bs2$`ant-weak_mut-absent`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-absent`, conf.level = 0.95)
-#t = -77.526, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 2
-# 1.267332 1.303468
-#mean of x:  1.2854 
-
 z.aweak <- (bs_obs$`ant-weak_mut-absent` - mean(bs2$`ant-weak_mut-absent`))/sd(bs2$`ant-weak_mut-absent`) #0.7752605
 pnorm(z.aweak, lower.tail=T) #p-value: 0.7809071
 # Upper 1−tailed test:
@@ -283,12 +238,6 @@ pnorm(z.aweak, lower.tail=F) #p−value: 0.2190929
 #Random pattern
 
 #STRONG MUTUALISM-WEAK ANTAGONISM
-t.test(bs2$`ant-weak_mut-strong`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-strong`, conf.level = 0.95)
-#t = -85.332, df = 9999, p-value < 2.2e-16
-#alternative hypothesis: true mean is not equal to 1
-#0.4507666 0.4754334
-#mean of x: 0.4631 
-
 z.mstrong_aweak <- (bs_obs$`ant-weak_mut-strong` - mean(bs2$`ant-weak_mut-strong`))/sd(bs2$`ant-weak_mut-strong`) #0.8533216
 # Lower 1−tailed test:
 pnorm(z.mstrong_aweak, lower.tail=T) #p-value: 0.8032595
@@ -297,12 +246,6 @@ pnorm(z.mstrong_aweak, lower.tail=F) #p−value: 0.1967405
 #Random pattern
 
 #WEAK MUTUALISM-WEAK ANTAGONISM
-t.test(bs2$`ant-weak_mut-weak`, alternative = 'two.sided', mu=bs_obs$`ant-weak_mut-weak`, conf.level = 0.95)
-#t = 5.6561, df = 9999, p-value = 1.591e-08
-#alternative hypothesis: true mean is not equal to 1
-# 1.032149 1.066251
-#mean of x: 1.0492 
-
 z.mweak_aweak <- (bs_obs$`ant-weak_mut-weak` - mean(bs2$`ant-weak_mut-weak`))/sd(bs2$`ant-weak_mut-weak`) #-0.05656088
 # Lower 1−tailed test:
 pnorm(z.mweak_aweak, lower.tail=T) #p-value: 0.4774475
@@ -362,18 +305,94 @@ ggplot(total,aes(x=variable,y=value, fill=Data))+
   geom_bar(stat="identity",position="dodge", colour="black")+
   scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,18, 2))+
   geom_errorbar(aes(ymin=value-SD, ymax=value+SD),
-                  width=.2,                    # With of the error bars
-                  position=position_dodge(.9))+scale_x_discrete(limits= c("Abs", "SM", "WM","SM / WA", "SM / SA", "WM / WA","WM / SA","WA", "SA"))+ theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ theme(
-                    panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
-                                   colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+                width=.2,   position=position_dodge(.9))+                  # With of the error bars
+                scale_x_discrete(limits= c("Abs", "SM", "WM","SM / WA", "SM / SA", "WM / WA","WM / SA","WA", "SA"))+ 
+                theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
 
 ```
 
-###Creating a new classification for logistic regression analysis
+###Creating a new classification for discriminant analysis
 ```{r}
-im_glm <- read_csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm.csv")
+im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm.csv")
 im_lreg <- mutate(im_glm,
-    #Compute ant and mut effects
-    new_class = if_else( combination == "ant-absent_mut-absent","Absent", if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism", if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism", if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" ))))))))))
+        Motif = if_else( combination == "ant-absent_mut-absent","Absent",
+                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
+                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
+                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
+                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
+                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" )))))))))) 
+
+
+im_lda<-subset(im_lreg[13:25])
+im_lda$Motif<-as.factor(im_lda$Motif)
+contrasts(im_lda$Motif)
+
+
+im.lda<-lda(im_lda$Motif~ ., data=im_lda)
+im.lda
+im_p<-predict(im.lda)
+im.lda.p<-predict(im.lda, newdata=im_lda[,c(1:12)])$class
+table(im.lda.p,im_lda[,13])
+plot(im.lda)
+
+im.lda1<-lda(im_lda$Motif~ ., data=im_lda,CV=TRUE)
+table(im.lda1$class,im_lda[,13])
+
+im_lda["LD1"]<-NA
+im_lda$LD1<-im_p$x[,1]
+
+im_lda["LD2"]<-NA
+im_lda$LD2<-im_p$x[,2]
+
+im_lreg["predict_motif"]<-NA
+im_lreg$predict_motif<-im.lda1$class
+
+#percent correct for eahc category  
+ct <- table(im_lda$Motif, im.lda1$class)
+diag(prop.table(ct, 1))
+# total percent correct
+sum(diag(prop.table(ct)))
+
+
+
+p<-ggplot(im_lda, aes(LD1, LD2))
+p+geom_point(aes(colour=Motif))
+
+
+
+
+
+####
+im_lda2<-subset(im_lreg[12:24])
+
+im.lda2<-lda(im_lda2$combination~ ., data=im_lda2)
+im.lda2
+im_p2<-predict(im.lda2)
+im.lda.p2<-predict(im.lda2, newdata=im_lda2[,c(2:13)])$class
+table(im.lda.p2,im_lda2[,1])
+
+im.lda2.1<-lda(im_lda2$combination~ ., data=im_lda2,CV=TRUE)
+table(im.lda2.1$class,im_lda2[,1])
+
+im_lda2["LD1"]<-NA
+im_lda2$LD1<-im_p2$x[,1]
+
+im_lda2["LD2"]<-NA
+im_lda2$LD2<-im_p2$x[,2]
+
+
+
+#percent correct for eahc category  
+ct2 <- table(im_lda2$combination, im.lda2.1$class)
+diag(prop.table(ct2, 1))
+# total percent correct
+sum(diag(prop.table(ct2)))
+  
+p2<-ggplot(im_lda2, aes(LD1, LD2))
+p2+geom_point(aes(colour=combination))
 ```
 
