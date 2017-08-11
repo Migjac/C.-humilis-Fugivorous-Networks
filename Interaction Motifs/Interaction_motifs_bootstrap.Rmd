@@ -284,12 +284,12 @@ obs_data<-subset(obs_data [,-1])
 colnames(obs_data)<-c("variable", "value")
 obs_data["Data"]<-NA        #adding a new column for data type
 obs_data$Data<-"1Observed" 
-obs_data["SD"]<-NA     #adding a new column for standard deviation
+obs_data["SD"]<-NA     #adding a new column for standard deviation. We leave as NA because we only measure de frequency of appearence of each typology, also is helpful to the graph esthetic.
 
 
-total<-rbind(obs_data,expect_data)
+total<-rbind(obs_data,expect_data) #Joining expected and observed data
 
-
+##Changing the names of each typology, for a shorter name
 levels(total$variable)[levels(total$variable)=="ant-absent_mut-absent"]<-"Abs"
 levels(total$variable)[levels(total$variable)=="ant-absent_mut-strong"]<-"SM"
 levels(total$variable)[levels(total$variable)=="ant-absent_mut-weak"]<-"WM"
@@ -302,20 +302,22 @@ levels(total$variable)[levels(total$variable)=="ant-weak_mut-weak"]<-"WM / WA"
 
 #ggplot of the observed frequencies of the motifs 
 ggplot(total,aes(x=variable,y=value, fill=Data))+
-  geom_bar(stat="identity",position="dodge", colour="black")+
-  scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,18, 2))+
-  geom_errorbar(aes(ymin=value-SD, ymax=value+SD),
-                width=.2,   position=position_dodge(.9))+                  # With of the error bars
-                scale_x_discrete(limits= c("Abs", "SM", "WM","SM / WA", "SM / SA", "WM / WA","WM / SA","WA", "SA"))+ 
+       geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
+       scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,18, 2))+
+       geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
+                width=.2,   position=position_dodge(.9))+                  
+                scale_x_discrete(limits= c("Abs", "SM", "WM","SM / WA", "SM / SA", "WM / WA","WM / SA","WA", "SA"))+     #giving the appropiate order of the typologies from mutualist to antagonist
                 theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ 
-                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
 
 ```
 
-###Creating a new classification for discriminant analysis
+###Discriminant analysis
 ```{r}
 im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm.csv")
-im_lreg <- mutate(im_glm,
+
+ #Creating a new column with colapsed cathegories
+im_lreg <- mutate(im_glm,                    
         Motif = if_else( combination == "ant-absent_mut-absent","Absent",
                              if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
                              if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
@@ -327,27 +329,33 @@ im_lreg <- mutate(im_glm,
                              if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" )))))))))) 
 
 
-im_lda<-subset(im_lreg[13:25])
-im_lda$Motif<-as.factor(im_lda$Motif)
-contrasts(im_lda$Motif)
 
+#selecting only the explanatory variables
+im_lda<-subset(im_lreg[13:25])        
 
+#Correlation matriz for explanatory variables
+cor(im_lda[1:11])
+
+#Discriminant analysis
 im.lda<-lda(im_lda$Motif~ ., data=im_lda)
 im.lda
 im_p<-predict(im.lda)
-im.lda.p<-predict(im.lda, newdata=im_lda[,c(1:12)])$class
-table(im.lda.p,im_lda[,13])
-plot(im.lda)
+im.lda.p<-predict(im.lda, newdata=im_lda[,c(1:12)])$class     #predicted categories
+table(im.lda.p,im_lda[,13])                                   #table with misclassifications, due the selected variables
 
-im.lda1<-lda(im_lda$Motif~ ., data=im_lda,CV=TRUE)
-table(im.lda1$class,im_lda[,13])
 
+im.lda1<-lda(im_lda$Motif~ ., data=im_lda,CV=TRUE)             #Cross validation analysis
+table(im.lda1$class,im_lda[,13])                               #It seems that the worst classification i for strong and weak mutualism
+
+
+#Variables useful to plot the tupologies in the coordinates LD1 and LD2
 im_lda["LD1"]<-NA
 im_lda$LD1<-im_p$x[,1]
 
 im_lda["LD2"]<-NA
 im_lda$LD2<-im_p$x[,2]
 
+#Adding to the main data frame the predicted motif 
 im_lreg["predict_motif"]<-NA
 im_lreg$predict_motif<-im.lda1$class
 
@@ -358,15 +366,13 @@ diag(prop.table(ct, 1))
 sum(diag(prop.table(ct)))
 
 
-
+#Plot for dicriminant analysis
 p<-ggplot(im_lda, aes(LD1, LD2))
 p+geom_point(aes(colour=Motif))
 
 
 
-
-
-####
+####Discirminant analysis without collapsed typologies
 im_lda2<-subset(im_lreg[12:24])
 
 im.lda2<-lda(im_lda2$combination~ ., data=im_lda2)
@@ -386,7 +392,7 @@ im_lda2$LD2<-im_p2$x[,2]
 
 
 
-#percent correct for eahc category  
+#percent correct for each category  
 ct2 <- table(im_lda2$combination, im.lda2.1$class)
 diag(prop.table(ct2, 1))
 # total percent correct
