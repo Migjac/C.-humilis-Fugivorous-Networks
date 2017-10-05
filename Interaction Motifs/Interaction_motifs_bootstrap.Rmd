@@ -57,8 +57,6 @@ my_matrix<-matrix_effects_resized
 Creating a function for the iteration results given the median. Creating a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox.
 ```{r}
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
-  
-  
   counts <- mutate( my_matrix,
     #Compute ant and mut effects
     ant = deer + wildboar,
@@ -67,10 +65,21 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
     class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
     class_mut = if_else( mut == 0, "absent", if_else( mut < median, "weak", if_else( mut >= median, "strong", "ERROR" ))),
     combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
-    group_by(combination) %>%
+    mutate(.,Motif = if_else( combination == "ant-absent_mut-absent","Absent",
+                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
+                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
+                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
+                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
+                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" )))))))))) %>% 
+    group_by(Motif) %>%
     summarise(count = n(),
               freq  = count/n_row) %>%
-    mutate(iteration = iteration)
+    mutate(iteration = iteration) 
+    
+      
   
   return( counts )
 }
@@ -88,7 +97,22 @@ counts <- compute_per_category_count (as.data.frame(apply(matrix_effects_resized
 boostrap_df <- rbind(counts, boostrap_df)
 }
 
+
+
 ```
+
+###im_colapsed <- mutate(marti_matas_im_bs,                    
+        Motif = if_else( combination == "ant-absent_mut-absent","Absent",
+                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
+                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
+                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
+                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
+                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" ))))))))))
+
+
 
 We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas  , perhps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.
 
@@ -120,8 +144,33 @@ boxplot(marti_matas_im_bs$count~marti_matas_im_bs$combination,data=marti_matas_i
 ```
 
 
+```{r, Colapsed cthegories}
+ #Creating a new column with colapsed cathegories
+marti_matas_im_bs<-read.csv("boostrap_marti_matas.csv")
+
+im_colapsed <- mutate(marti_matas_im_bs,                    
+        Motif = if_else( combination == "ant-absent_mut-absent","Absent",
+                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
+                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
+                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
+                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
+                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
+                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" ))))))))))
+
+
+#Reorganizing the typologies into columns to analyze the significance of each typology given the expected and observed data
+
+im_col<-im_colapsed[,-2]
+bs_marti_matas<-dplyr::select (im_col, Motif, count, iteration) %>% spread(key=Motif, value=count, fill=0)
+```
+
+
+
+
 Reorganizing the typologies into columns to analyze the significance of each typology given the expected and observed data
-```{r}
+```{r, no-colapsed}
 
 #Martinazo
 bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
@@ -130,7 +179,7 @@ bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combin
 bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
 
 #Both populations
-bs_marti_matas<-select (marti_matas_im_bs, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
+bs_marti_matas<-select (marti_matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
 
 write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas.csv")
 
