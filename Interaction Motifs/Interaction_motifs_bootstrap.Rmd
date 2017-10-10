@@ -54,7 +54,7 @@ n_row <- nrow(matrix_effects_resized)
 my_matrix<-matrix_effects_resized
 ```
 
-Creating a function for the iteration results given the median. Creating a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox.
+Creating a function for the iteration results given the median. Creating a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox. Redesignd motifs
 ```{r}
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   counts <- mutate( my_matrix,
