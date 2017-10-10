@@ -11,6 +11,7 @@ library(dplyr)
 library(reshape2)
 library(tidyr)
 library(ggplot2)
+library(devtools)
 ```
 
 
@@ -53,18 +54,18 @@ mm_visits_sd<-apply(mm_visits,2,sd)
 
 mart_visits_long<-melt(mart_visits_mean,id.vars="mean")
 colnames(mart_visits_long) <- "visit_mean"
-mart_visits_long["SD"]<-NA  #adding a new column for standard deviation
-mart_visits_long$SD<-mart_visits_sd #adding the values of standard deviation
+mart_visits_long["SE"]<-NA  #adding a new column for standard deviation
+mart_visits_long$SE<-mart_visits_sd/sqrt(length(mart_visits_long)) #adding the values of standard deviation
 
 matas_visits_long<-melt(matas_visits_mean,id.vars="mean")
 colnames(matas_visits_long) <- "visit_mean"
-matas_visits_long["SD"]<-NA  #adding a new column for standard deviation
-matas_visits_long$SD<-matas_visits_sd #adding the values of standard deviation
+matas_visits_long["SE"]<-NA  #adding a new column for standard deviation
+matas_visits_long$SE<-matas_visits_sd/sqrt(length(matas_visits_long)) #adding the values of standard deviation
 
 mm_visits_long<-melt(mm_visits_mean,id.vars="mean")
 colnames(mm_visits_long) <- "visit_mean"
-mm_visits_long["SD"]<-NA  #adding a new column for standard deviation
-mm_visits_long$SD<-mm_visits_sd #adding the values of standard deviation
+mm_visits_long["SE"]<-NA  #adding a new column for standard error
+mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_mean)) #adding the values of standard error
 
 #naming the first column
 
@@ -121,18 +122,18 @@ mm_fruits_sd<-apply(mm_fruits,2,sd)
 
 mart_fruits_long<-melt(mart_fruits_mean,id.vars="mean")
 colnames(mart_fruits_long) <- "fruit_mean"
-mart_fruits_long["SD_f"]<-NA  #adding a new column for standard deviation
-mart_fruits_long$SD_f<-mart_fruits_sd #adding the values of standard deviation
+mart_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mart_fruits_long$SE_f<-mart_fruits_sd/sqrt(length(mart_fruits_long)) #adding the values of standard deviation
 
 matas_fruits_long<-melt(matas_fruits_mean,id.vars="mean")
 colnames(matas_fruits_long) <- "fruit_mean"
-matas_fruits_long["SD_f"]<-NA  #adding a new column for standard deviation
-matas_fruits_long$SD_f<-matas_fruits_sd #adding the values of standard deviation
+matas_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+matas_fruits_long$SE_f<-matas_fruits_sd/sqrt(length(matas_fruits_long)) #adding the values of standard deviation
 
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
-mm_fruits_long["SD_f"]<-NA  #adding a new column for standard deviation
-mm_fruits_long$SD<-mm_fruits_sd #adding the values of standard deviation
+mm_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mm_fruits_long$SE_f<-mm_fruits_sd/sqrt(length(mm_visits_mean)) #adding the values of standard deviation
 
 #naming the first column
 
@@ -142,24 +143,26 @@ matas_fruits_long <- add_rownames(matas_fruits_long, "animal")
 
 mm_fruits_long <- add_rownames(mm_fruits_long, "animal")
 
-
+mm_fruits_long<-mm_fruits_long[,-1]
 #Join coulumns
 
 mart_total<-cbind(mart_visits_long,mart_fruits_long[,-1])
 mart_total<-mutate(mart_total,
-     i_group = if_else( animal == "deer","Antagonist", if_else(animal == "wildboar", "Antagonist", if_else(animal == "rabbit", "Mutualist", if_else(animal == "rat", "Mutualist", if_else(animal == "fox", "Mutualist", if_else( animal == "badger", "Mutualist", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildboar", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 as.data.frame(mart_total)
 
 matas_total<-cbind(matas_visits_long,matas_fruits_long[,-1])
 matas_total<-mutate(matas_total,
-     i_group = if_else( animal == "deer","Antagonist", if_else(animal == "wildboar", "Antagonist", if_else(animal == "rabbit", "Mutualist", if_else(animal == "rat", "Mutualist", if_else(animal == "fox", "Mutualist", if_else( animal == "badger", "Mutualist", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildboar", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+as.data.frame(mart_total)
 
 as.data.frame(matas_total)
 
 
 mm_total<-cbind(mm_visits_long,mm_fruits_long[,-1])
 mm_total<-mutate(mm_total,
-     i_group = if_else( animal == "deer","Antagonist", if_else(animal == "wildboar", "Antagonist", if_else(animal == "rabbit", "Mutualist", if_else(animal == "rat", "Mutualist", if_else(animal == "fox", "Mutualist", if_else( animal == "badger", "Mutualist", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildboar", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+as.data.frame(mart_total)
 
 
 as.data.frame(mm_total)
@@ -168,105 +171,25 @@ as.data.frame(mm_total)
 #Effectiveness landscape
 ```{r}
 # Installation.
-devtools::install_github("pedroj/effectiveness_pckg")
+devtools::install_github("pakillo/effectiveness_pckg", force=TRUE)
 library(effect.lndscp)
 
 ###Martinazo
-###
-    
-    nlines <- 10
-     alfa1 <- max(mart_total$fruit_mean)/max(mart_total$visit_mean)
-     # sequence of (nlines) regular spaced x values for the isoclines
-    xval1 <- seq(0, max(mart_total$visit_mean), 
-        length.out=(nlines+1))[2:(nlines+1)] 
-     isoc1 <- (xval1*alfa1) # values of the isoclines
-    vis1<-seq(0, max(mart_total$visit_mean), length.out= 1000)
-     pp1<- as.data.frame(vis1)
-    
-    for(i in 1:nlines)
-    {
-        pp1<- cbind(pp1, isoc1[i]/vis1)
-    }    
-    ##
-     
-     p1<- ggplot(mart_total, aes(x=visit_mean, y= fruit_mean)) + 
-        geom_point(aes(colour=animal),size=3) +
-        geom_text(size= 4, label= mart_total[,1], hjust= 1.3, vjust= 0) 
 
-# Adding isolines -------------------------------------------------
-    labelx<- rep(0.8*max(mart_total$visit_mean), nlines)
-    labely<- as.vector(t(pp1[800,1:nlines+1]))
-     
-    
-    myxlab= "Visitiation Rate"
-    myylab= "Handled Fruits"
-    
-    for(i in 1:nlines+1){ 
-         p1= p1 + geom_line(aes(x, y), 
-            data= data.frame(x= pp1$vis1, y= pp1[,i]), 
-            col="blue", size = 0.25, alpha= 0.6) + 
-            ylim(0, 2) +
-            xlab(paste(myxlab)) + 
-            ylab(paste(myylab))
-    }
-    
-    
-    
-p1 + annotate("text", x= labelx, y= labely, label=paste("QC= ", round(isoc,2)), size=3) + ggtitle("Effectiveness landscape\nfor Martinazo's dwarf palm frugivorus") +theme(plot.title = element_text(hjust = 0.5)) + theme(
-                    panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
-                                   colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p1<-effectiveness_plot(q1=mart_total$visit_mean,q2=mart_total$fruit_mean, q1.error =mart_total$SE, q2.error = mart_total$SE_f, pts.color=mart_total$i_group,label=mart_total$animal, nlines=8, 
+                   myxlab= "No. visits/10d", 
+   myylab="Proportion of fruits handled")
+p1+ ggtitle("Martinazo's dwarf palm frugivorus")
+
 
 ###Matasgordas
 ###
 
-effectiveness(matas_total$visit_mean,matas_total$fruit_mean, 
-              matas_total$i_group, 
-              matas_total$animal, 10, 
-   myxlab= "No. visits/10h", 
-   myylab="Effectiveness/vis (No. fruits handled)")
+p2<-effectiveness_plot(q1=matas_total$visit_mean,q2=matas_total$fruit_mean, q1.error =matas_total$SE, q2.error = matas_total$SE_f, pts.color=matas_total$i_group,label=matas_total$animal, nlines=8, 
+                   myxlab= "No. visits/10d", 
+   myylab="Proportion of fruits handled")
+p2+ ggtitle("Martasgordas's dwarf palm frugivorous")
 
-    
-    nlines <- 10
-     alfa2 <- max(matas_total$fruit_mean)/max(matas_total$visit_mean)
-     # sequence of (nlines) regular spaced x values for the isoclines
-    xval2 <- seq(0, max(matas_total$visit_mean), 
-        length.out=(nlines+1))[2:(nlines+1)] 
-     isoc2 <- (xval2*alfa2) # values of the isoclines
-    vis2<-seq(0, max(matas_total$visit_mean), length.out= 1000)
-     pp2<- as.data.frame(vis2)
-    
-    for(i in 1:nlines)
-    {
-        pp2<- cbind(pp2, isoc2[i]/vis2)
-    }    
-    ##
-     
-     p2<- ggplot(matas_total, aes(x=visit_mean, y= fruit_mean)) + 
-        geom_point(aes(colour=animal),size=3) +
-        geom_text(size= 4, label= matas_total[,1], hjust= 1.3, vjust= 0) 
-
-# Adding isolines -------------------------------------------------
-    labelx2<- rep(0.8*max(matas_total$visit_mean), nlines)
-    labely2<- as.vector(t(pp2[800,1:nlines+1]))
-     
-    
-    myxlab= "Visitiation Rate"
-    myylab= "Handled Fruits"
-    
-    for(i in 1:nlines+1){ 
-         p2= p2 + geom_line(aes(x, y), 
-            data= data.frame(x= pp2$vis2, y= pp2[,i]), 
-            col="blue", size = 0.25, alpha= 0.6) + 
-            ylim(0, 0.5) +
-            xlab(paste(myxlab)) + 
-            ylab(paste(myylab))
-    }
-    
-    
-    
-p2 + annotate("text", x= labelx, y= labely, label=paste("QC= ", round(isoc2,2)), size=3) + ggtitle("Effectiveness landscape\nfor Matasgordas's dwarf palm frugivorus") +theme(plot.title = element_text(hjust = 0.5)) + theme(
-                    panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
-                                   colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
 ```
 
 
@@ -275,54 +198,11 @@ p2 + annotate("text", x= labelx, y= labely, label=paste("QC= ", round(isoc2,2)),
 
 ```{r}
 ###Both populations
-###
-    
-    nlines <- 10
-     alfa <- max(mm_total$fruit_mean)/max(mm_total$visit_mean)
-     # sequence of (nlines) regular spaced x values for the isoclines
-    xval <- seq(0, max(mm_total$visit_mean), 
-        length.out=(nlines+1))[2:(nlines+1)] 
-     isoc <- (xval*alfa) # values of the isoclines
-    vis<-seq(0, max(mm_total$visit_mean), length.out= 1000)
-     pp<- as.data.frame(vis1)
-    
-    for(i in 1:nlines)
-    {
-        pp<- cbind(pp, isoc[i]/vis)
-    }    
-    ##
-     
-     p3<- ggplot(mm_total, aes(x=visit_mean, y= fruit_mean)) + 
-        geom_point(aes(colour=animal),size=3) +
-        geom_text(size= 4, label= mm_total[,1], hjust= 1.3, vjust= 0) 
 
-# Adding isolines -------------------------------------------------
-    labelx<- rep(0.8*max(mm_total$visit_mean), nlines)
-    labely<- as.vector(t(pp[800,1:nlines+1]))
-     
-    
-    myxlab= "Visitiation Rate"
-    myylab= "Handled Fruits"
-    
-    for(i in 1:nlines+1){ 
-         p1= p1 + geom_line(aes(x, y), 
-            data= data.frame(x= pp$vis, y= pp[,i]), 
-            col="blue", size = 0.25, alpha= 0.6) + 
-            ylim(0, 1) +
-            xlab(paste(myxlab)) + 
-            ylab(paste(myylab))
-    }
-    
-    
-    
-p3 + annotate("text", x= labelx, y= labely, label=paste("QC= ", round(isoc,2)), size=3) + ggtitle("Effectiveness landscape\nfor dwarf palm frugivorous") +theme(plot.title = element_text(hjust = 0.5)) + theme(
-                    panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid",
-                                   colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-        
-
+p3<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, q1.error =mm_total$SE, q2.error = mm_total$SE_f, pts.color=mm_total$i_group,label=mm_total$animal, nlines=8,                       myxlab= "No. visits/10d", 
+                      myylab="Proportion of fruits handled")
+                      p3+ ggtitle("Dwarf palm frugivorous")
 
 ```
-
-
 
 
