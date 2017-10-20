@@ -24,7 +24,9 @@ library(ggplot2)
 
 Matrix
 ```{r}
-matrix_effects_resized <- read.csv("Marti_matas.csv")
+matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_matas_eff.csv")
+matrix_effects_resized<-matrix_effects_resized[,-1]
+matrix_effects_resized<-matrix_effects_resized[,-7]
 ```
 
 
@@ -40,8 +42,7 @@ badger_weight=0.179
 
 Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
 ```{r setup, include=FALSE}
-matrix_effects_resized <- read.csv("Marti_matas.csv") %>%  
-mutate(
+matrix_effects_resized <-mutate(matrix_effects_resized,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
     rat = rat * rat_weight,
@@ -61,7 +62,7 @@ Creating a function for the iteration results given the median. Creating a colum
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   counts <- mutate( my_matrix,
     #Compute ant and mut effects
-    ant = deer + wildboar,
+    ant = deer + wildb,
     mut = (rabbit + rat ) + 
           (fox    + badger ),
     class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
@@ -88,7 +89,7 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
 ```
 
 ```{r}
-write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_colapsed2.csv")
+write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_colapsed5.csv")
 ```
 
 
@@ -145,9 +146,10 @@ bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combin
 bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
 
 #Both populations
+marti_matas_im<-marti_matas_im[,-4]
 bs_marti_matas<-select (marti_matas_im, Motif, count, iteration) %>% spread(.,key=Motif, value=count, fill=0)
 
-write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas2.csv")
+write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas3.csv")
 
 ```
 
@@ -182,36 +184,36 @@ c(-z.half.alpha, z.half.alpha)
 #[1] -1.959964  1.959964
 
 #ABSENT
-z.abs <- (bs_obs$Absent - mean(bs2$Absent))/sd(bs2$Absent) #0.7263819
+z.abs <- (bs_obs$Absent - mean(bs2$Absent))/sd(bs2$Absent) #0.7360873
 # Lower 1−tailed test:
-pnorm(z.abs, lower.tail=T) #p-value: 0.7661977
+pnorm(z.abs, lower.tail=T) #p-value: 0.7691612
 # Upper 1−tailed test:
-pnorm(z.abs, lower.tail=F) #p−value: 0.2338023
+pnorm(z.abs, lower.tail=F) #p−value: 0.2308388
 #Random pattern
 
 #MUTUALISM_ANTAGONISM
-z.mu_ant <- (bs_obs$Mutualism_Antagonism - mean(bs2$Mutualism_Antagonism))/sd(bs2$Mutualism_Antagonism) #-0.5162679
+z.mu_ant <- (bs_obs$Mutualism_Antagonism - mean(bs2$Mutualism_Antagonism))/sd(bs2$Mutualism_Antagonism) #-0.4901384
 # Lower 1−tailed test:
-pnorm(z.mu_ant, lower.tail=T) #p-value: 0.3028337
+pnorm(z.mu_ant, lower.tail=T) #p-value: 0.312018
 # Upper 1−tailed test:
-pnorm(z.mu_ant, lower.tail=F) #p−value: 0.6971663
+pnorm(z.mu_ant, lower.tail=F) #p−value: 0.687982
 #Random pattern
 
 
 #MUTUALISM
-z.mut <- (bs_obs$StrongW_Mutualism - mean(bs2$StrongW_Mutualism))/sd(bs2$StrongW_Mutualism) #0.8622562
+z.mut <- (bs_obs$StrongW_Mutualism - mean(bs2$StrongW_Mutualism))/sd(bs2$StrongW_Mutualism) #0.8601446
 # Lower 1−tailed test:
-pnorm(z.mut, lower.tail=T) #p-value: 0.8057267
+pnorm(z.mut, lower.tail=T) #p-value: 0.8051453
 # Upper 1−tailed test:
-pnorm(z.mut, lower.tail=F) #p−value: 0.1942733
+pnorm(z.mut, lower.tail=F) #p−value: 0.1948547
 #Random pattern
 
 #ANTAGONISM
-z.ant <- (bs_obs$StrongW_Antagonism - mean(bs2$StrongW_Antagonism))/sd(bs2$StrongW_Antagonism) #-1.150438
+z.ant <- (bs_obs$StrongW_Antagonism - mean(bs2$StrongW_Antagonism))/sd(bs2$StrongW_Antagonism) #-1.169806
 # Lower 1−tailed test:
-pnorm(z.ant, lower.tail=T) #p-value: 0.1249818
+pnorm(z.ant, lower.tail=T) #p-value: 0.1210395
 # Upper 1−tailed test:
-pnorm(z.ant, lower.tail=F) #p−value: 0.8750182
+pnorm(z.ant, lower.tail=F) #p−value: 0.8789605
 #Random pattern
 ```
 
@@ -266,10 +268,10 @@ ggplot(total,aes(x=variable,y=value, fill=Data))+
 im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/im_glm4.csv")
 
 #selecting only the explanatory variables
-im_lda<-subset(im_glm[25:35])        
+im_lda<-subset(im_glm[25:34])        
 
 #Correlation matriz for explanatory variables
-cor(im_lda[4:11])
+cor(im_lda[3:10])
 
 
 #Using scale of the matrix
@@ -283,10 +285,10 @@ im.lda<-lda(im_lda$motif~ im_lda$inf_s+im_lda$size_s+im_lda$sincr_s+im_lda$fruit
 im.lda
 im_p<-predict(im.lda)
 im.lda.p<-predict(im_lda, newdata=im_lda[,c(3:10)])$class     #predicted categories
-table(im.lda.p,im_lda[,2])                                   #table with misclassifications, due the selected variables
+table(im.lda$class,im_lda[,2])                                   #table with misclassifications, due the selected variables
 
 
-im.lda1<-lda(im_lda$motif~ ., data=im_lda,CV=TRUE)             #Cross validation analysis
+im.lda1<-lda(im_lda$motif~ im_lda$inf_s+im_lda$size_s+im_lda$sincr_s+im_lda$fruits_s+im_lda$fruit_set_s+im_lda$del.area_s+im_lda$nn_s+im_lda$dens_s, data=im_lda,CV=TRUE)             #Cross validation analysis
 table(im.lda1$class,im_lda[,2])                               #It seems that the worst classification i for strong and weak mutualism
 
 
@@ -313,11 +315,11 @@ sum(diag(prop.table(ct)))
 
 #Plot for dicriminant analysis for motif
 p<-ggplot(im_lda, aes(LD1, LD2, color= motif))+geom_point()+
-  stat_ellipse(type = "t",linetype=5)+xlim(-5,4) +theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+  stat_ellipse(type = "t",linetype=5)+xlim(-6,5) +theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
 
 #Plot for dicriminant analysis for population
 p<-ggplot(im_lda, aes(LD1, LD2, color= pop))+geom_point()+
-  stat_ellipse(type = "t",linetype=3)+xlim(-5,4)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+  stat_ellipse(type = "t",linetype=3)+xlim(-6,5)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
   
   
 ##Plots
@@ -325,7 +327,7 @@ library(devtools)
 install_github("fawda123/ggord")
 library(ggord)
 new_lab <- list(im_lda$inf_s = 'INF', im_lda$size_s = 'SIZE', im_lda$sincr_s = 'SINCR',im_lda$fruits_s = 'FRUITS',im_lda$fruit_set_s = 'FRUIT_SET',im_lda$del.area_s = 'AREA',im_lda$nn_s = 'NN',im_lda$dens_s = 'DENS')
-ggord(im.lda, im_lda$motif, ellipse= FALSE, hull= TRUE, poly=FALSE)
+ggord(im.lda, im_lda$motif, ellipse= TRUE, hull= TRUE, poly=FALSE)
 
 
 ####Discirminant analysis without collapsed typologies
