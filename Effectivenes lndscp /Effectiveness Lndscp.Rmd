@@ -196,13 +196,78 @@ p2+ ggtitle("Martasgordas's dwarf palm frugivorous")
 
 ```
 
+```{r}
+#Martinazo
+mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Matasgordas
+matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Wihout unknown
+mart_e<-subset(mart_e[,-7])
+matas_e<-subset(matas_e[,-7])
+
+#convert data.frame to matrix
+mart_e<-data.matrix(mart_e)
+matas_e<-data.matrix(matas_e)
+
+#mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+
+mart_emean<-apply(mart_e,2,mean)
+mart_esd<-apply(mart_e,2,sd)
+
+matas_e_mean<-apply(matas_e,2,mean)
+matas_e_sd<-apply(matas_e,2,sd)
+
+#Creating long shape with the means of each motif
+mart_elong<-melt(mart_emean,id.vars="mean")
+colnames(mart_elong) <- "Effectiveness"
+
+
+matas_elong<-melt(matas_e_mean,id.vars="mean")
+colnames(matas_elong) <- "Effectiveness"
+
+#naming the first column
+mart_elong <- add_rownames(mart_elong, "animal")
+
+
+mart_elong<-mutate(mart_elong,
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+
+mart_elong<-mutate(mart_elong,
+     recruit = if_else( animal == "deer","0.01115", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+
+recruit<-as.numeric(mart_elong$recruit)
+mart_elong<-cbind(mart_elong[,-4],recruit)
+
+matas_elong <- add_rownames(matas_elong, "animal")
+
+
+matas_elong<-mutate(matas_elong,
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+
+matas_elong<-mutate(matas_elong,
+     recruit = if_else( animal == "deer","0.01115", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+
+recruit<-as.numeric(matas_elong$recruit)
+matas_elong<-cbind(matas_elong[,-4],recruit)
+
+mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group,label=mart_elong$animal, nlines=10,
+                       myxlab= "Handled fruits/Visit",
+                       myylab="Plant recruitment")
+
+matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group,label=matas_elong$animal, nlines=16,
+                       myxlab= "Handled fruits/Visit",
+                       myylab="Plant recruitment")
+```
+
 
 ```{r}
 ###Both populations
 mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Wihout unknown
-mm_e<-subset(mart_matas_fruits[,-7])
+mm_e<-subset(mart_matas_e[,-7])
 
 #convert data.frame to matrix
 mm_e<-data.matrix(mm_e)
@@ -225,13 +290,13 @@ mm_e_long<-mutate(mm_e_long,
      i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 
 mm_e_long<-mutate(mm_e_long,
-     recruit = if_else( animal == "deer","0.01206", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.01115", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(mm_e_long$recruit)
 mm_e_long<-cbind(mm_e_long[,-5],recruit)
 
 
-p3<-effectiveness_plot(q1=mm_e_long$Effectiveness,q2=mm_e_long$recruit, pts.color=mm_e_long$i_group,label=mm_e_long$animal, nlines=8,
+p3<-effectiveness_plot(q1=mm_e_long$Effectiveness,q2=mm_e_long$recruit, pts.color=mm_e_long$i_group,label=mm_e_long$animal, nlines=5,
                        myxlab= "Handled fruits/Visit",
                        myylab="Plant recruitment")
                       
