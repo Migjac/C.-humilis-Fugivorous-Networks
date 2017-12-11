@@ -20,6 +20,7 @@ mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Netwo
 matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 ```
 
+netcarto(matas_e)
 &nbsp;
 
 ####**Step 2.** Using "bipartite" package
@@ -75,10 +76,29 @@ plotweb(matas_e, col.low=c(gray(seq(0.1,1,length=34))), col.high=c("white","whit
 networklevel(mart_e, index = c("connectance","web asymmetry","cluster coefficient","nestedness","weighted nestedness"))
 ```
 
+#Nestedness significance
+```{r Nestedness significance Martinazo}
+martnulls<-nullmodel(mart_e, N=10000, method = 3)
+martnull <- unlist(sapply(martnulls, networklevel, index="weighted nestedness"))
+marte <- unlist(networklevel(mart_e, index="weighted nestedness"))
+praw <- sum(martnull>marte) / length(martnull)
+    ifelse(praw > 0.5, 1-praw, praw)  #p=0.0146
+```
+
+
 ```{r Networklevel of Matasgordas}
 #Matasgordas
 networklevel(matas_e,index = c("connectance","web asymmetry","cluster coefficient","nestedness","weighted nestedness"))
 ```
+
+```{r Nestedness significance Matasgordas}
+matasnulls<-nullmodel(matas_e, N=10000, method = 3)
+matasnull <- unlist(sapply(matasnulls, networklevel, index="connectance"))
+matase <- unlist(networklevel(matas_e, index="connectance"))
+praw <- sum(matasnull>matase) / length(matasnull)
+    ifelse(praw > 0.5, 1-praw, praw)  #p=0.33
+```
+
 
 ```{r Modularity, message=F, cache=T, echo=F, include = FALSE}
 mod_mart_e<-computeModules(mart_e)
@@ -86,7 +106,7 @@ mod_matas_e<-computeModules(matas_e)
 ```
 &nbsp;
 
-+ *Modularity:* Identify modules of closely interecting frugivores. Also test to what extent these modules have a spatial component. High modularity values means that the network is more stable.
++ *Modularity:* Identify modules of closely interecting frugivores with plants of similar charactdristics. High modularity values means that the network is more stable.
 
 Martinazo
 ```{r Modularity value of Martinazo, echo=FALSE}
@@ -220,6 +240,7 @@ spplvlmatas$`higher level`[,c(2,3,8,10)]
 LLspplvlmatas<-specieslevel(matas_e)
 LLspplvlmatas$`lower level`[,c(2,3,7,10,17)]
 ```
+
 
 
 

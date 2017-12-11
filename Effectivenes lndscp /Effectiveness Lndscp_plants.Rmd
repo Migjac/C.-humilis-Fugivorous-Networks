@@ -82,9 +82,10 @@ mm_total["motif"]<-NA
 mm_total$motif<-im_glm$motif
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$motif, nlines=9,
+p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,nlines=9,
                        myxlab= "Visit",
                        myylab="Handled fruits")
+
 
 p2<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$pop,nlines=9,
                        myxlab= "Visit",

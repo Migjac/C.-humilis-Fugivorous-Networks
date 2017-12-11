@@ -252,13 +252,22 @@ matas_elong<-mutate(matas_elong,
 recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
 
-mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group,label=mart_elong$animal, nlines=10,
+mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group,label=mart_elong$animal, nlines=6,lines.breaks = vect1,
                        myxlab= "Handled fruits/Visit",
                        myylab="Plant recruitment")
+vect1<-seq(0, 0.012,0.0019 ) 
+
+mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group,label=mart_elong$animal, nlines=6,
+                       myxlab= "Handled fruits/Visit",
+                       myylab="Plant recruitment")
+vect1<-seq(0, 0.012,0.0019 ) 
+
 
 matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group,label=matas_elong$animal, nlines=16,
                        myxlab= "Handled fruits/Visit",
                        myylab="Plant recruitment")
+
+vect<-seq(0, 0.012,0.0019 )
 ```
 
 
