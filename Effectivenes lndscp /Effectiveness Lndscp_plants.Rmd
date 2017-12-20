@@ -19,20 +19,58 @@ Opening a matrix file with weighted visits of frugivores in individual plants, t
 *Note: visit frequency= animal-visit-days/total-survey days.*
 
 ```{r opening visits matrix}
+#Martinazo
+mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Matasgordas
+matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+
 #Both populations
 mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits_pop.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Without column pop
+
+mrt_visits<-subset(mart_v[,-7])
+
+mtsg_visits<-subset(matas_v[,-7])
+
 mm_visits<-subset(mart_matas_visits[,-7])
 
+
+
 #convert data.frame to matrix
+
+mrt_visits<-data.matrix(mrt_visits)
+
+mtsg_visits<-data.matrix(mtsg_visits)
+
 mm_visits<-data.matrix(mm_visits)
 
+
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+
+mrt_visits_mean<-apply(mrt_visits,1,mean)
+mrt_visits_sd<-apply(mrt_visits,1,sd)
+
+mtsg_visits_mean<-apply(mtsg_visits,1,mean)
+mtsg_visits_sd<-apply(mtsg_visits,1,sd)
+
 mm_visits_mean<-apply(mm_visits,1,mean)
 mm_visits_sd<-apply(mm_visits,1,sd)
 
+
+
 #Creating long shape with the means of each motif
+
+mrt_visits_long<-melt(mrt_visits_mean,id.vars="mean")
+colnames(mrt_visits_long) <- "visit_mean"
+mrt_visits_long["SE"]<-NA  #adding a new column for standard error
+mrt_visits_long$SE<-mrt_visits_sd/sqrt(length(mrt_visits_mean)) #adding the values of standard error
+
+mtsg_visits_long<-melt(mtsg_visits_mean,id.vars="mean")
+colnames(mtsg_visits_long) <- "visit_mean"
+mtsg_visits_long["SE"]<-NA  #adding a new column for standard error
+mtsg_visits_long$SE<-mtsg_visits_sd/sqrt(length(mtsg_visits_mean)) #adding the values of standard error
 
 mm_visits_long<-melt(mm_visits_mean,id.vars="mean")
 colnames(mm_visits_long) <- "visit_mean"
@@ -40,6 +78,8 @@ mm_visits_long["SE"]<-NA  #adding a new column for standard error
 mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_mean)) #adding the values of standard error
 
 #naming the first column
+mrt_visits_long <- add_rownames(mrt_visits_long, "plant")
+mtsg_visits_long <- add_rownames(mtsg_visits_long, "plant")
 mm_visits_long <- add_rownames(mm_visits_long, "plant")
 
 ```
@@ -49,36 +89,72 @@ Opening a matrix file with weighted links with frugivores fruit removal in indiv
 
 ```{r}
 #Martinazo
-mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both poulations
 mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
 #Without column unknown
+
+mrt_fruits<-subset(mart_fruits[,-7])
+mtsg_fruits<-subset(matas_fruits[,-7])
 mm_fruits<-subset(mart_matas_fruits[,-7])
 
+
 #convert data.frame to matrix
+mrt_fruits<-data.matrix(mrt_fruits)
+mtsg_fruits<-data.matrix(mtsg_fruits)
 mm_fruits<-data.matrix(mm_fruits)
 
+
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+mrt_fruits_mean<-apply(mrt_fruits,1,mean)
+mrt_fruits_sd<-apply(mrt_fruits,1,sd)
+
+mtsg_fruits_mean<-apply(mtsg_fruits,1,mean)
+mtsg_fruits_sd<-apply(mtsg_fruits,1,sd)
+
 mm_fruits_mean<-apply(mm_fruits,1,mean)
 mm_fruits_sd<-apply(mm_fruits,1,sd)
 
+
 #Creating long shape with the means of each motif
+
+mrt_fruits_long<-melt(mrt_fruits_mean,id.vars="mean")
+colnames(mrt_fruits_long) <- "fruit_mean"
+mrt_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mrt_fruits_long$SE_f<-mrt_fruits_sd/sqrt(length(mrt_fruits_mean)) #adding the values of standard deviation
+
+mtsg_fruits_long<-melt(mtsg_fruits_mean,id.vars="mean")
+colnames(mtsg_fruits_long) <- "fruit_mean"
+mtsg_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mtsg_fruits_long$SE_f<-mtsg_fruits_sd/sqrt(length(mtsg_fruits_mean)) #adding the values of standard deviation
+
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
 mm_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mm_fruits_long$SE_f<-mm_fruits_sd/sqrt(length(mm_fruits_mean)) #adding the values of standard deviation
 
-#naming the first column
-mm_fruits_long <- add_rownames(mm_fruits_long, "plant")
 
+#naming the first column
+mrt_fruits_long <- add_rownames(mrt_fruits_long, "plants")
+mrt_fruits_long<-mrt_fruits_long[,-1]
+
+mtsg_fruits_long <- add_rownames(mtsg_fruits_long, "plants")
+mtsg_fruits_long<-mtsg_fruits_long[,-1]
+
+mm_fruits_long <- add_rownames(mm_fruits_long, "plants")
 mm_fruits_long<-mm_fruits_long[,-1]
+
+
 #Join coulumns
+
+mrt_total<-cbind(mrt_visits_long,mrt_fruits_long)
+mtsg_total<-cbind(mtsg_visits_long,mtsg_fruits_long)
 mm_total<-cbind(mm_visits_long,mm_fruits_long)
 
 #Adding columns pop and motif
