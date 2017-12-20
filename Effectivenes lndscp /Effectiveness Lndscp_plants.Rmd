@@ -1,0 +1,99 @@
+---
+title: "Efectiveness_Lndscp_Plants"
+author: "Miguel Jacome"
+date: "20/10/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(magrittr)
+library(dplyr)
+library(reshape2)
+library(tidyr)
+library(ggplot2)
+library(devtools)
+```
+
+
+Opening a matrix file with weighted visits of frugivores in individual plants, the "row.names=1" is necessary to run the model and to detect the "name of plants" in the matrix. 
+*Note: visit frequency= animal-visit-days/total-survey days.*
+
+```{r opening visits matrix}
+#Both populations
+mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits_pop.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Without column pop
+mm_visits<-subset(mart_matas_visits[,-7])
+
+#convert data.frame to matrix
+mm_visits<-data.matrix(mm_visits)
+
+#mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+mm_visits_mean<-apply(mm_visits,1,mean)
+mm_visits_sd<-apply(mm_visits,1,sd)
+
+#Creating long shape with the means of each motif
+
+mm_visits_long<-melt(mm_visits_mean,id.vars="mean")
+colnames(mm_visits_long) <- "visit_mean"
+mm_visits_long["SE"]<-NA  #adding a new column for standard error
+mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_mean)) #adding the values of standard error
+
+#naming the first column
+mm_visits_long <- add_rownames(mm_visits_long, "plant")
+
+```
+
+
+Opening a matrix file with weighted links with frugivores fruit removal in individual plants. Other specifications of the matrix are described in the fruits visits file. *Note: fruit removal= animal-fruits-days/total-fruits.*
+
+```{r}
+#Martinazo
+mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Matasgordas
+matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Both poulations
+mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+
+#Without column unknown
+mm_fruits<-subset(mart_matas_fruits[,-7])
+
+#convert data.frame to matrix
+mm_fruits<-data.matrix(mm_fruits)
+
+#mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+mm_fruits_mean<-apply(mm_fruits,1,mean)
+mm_fruits_sd<-apply(mm_fruits,1,sd)
+
+#Creating long shape with the means of each motif
+mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
+colnames(mm_fruits_long) <- "fruit_mean"
+mm_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mm_fruits_long$SE_f<-mm_fruits_sd/sqrt(length(mm_fruits_mean)) #adding the values of standard deviation
+
+#naming the first column
+mm_fruits_long <- add_rownames(mm_fruits_long, "plant")
+
+mm_fruits_long<-mm_fruits_long[,-1]
+#Join coulumns
+mm_total<-cbind(mm_visits_long,mm_fruits_long)
+
+#Adding columns pop and motif
+mm_total["pop"]<-NA
+mm_total$pop<-mart_matas_visits$pop
+mm_total["motif"]<-NA
+mm_total$motif<-im_glm$motif
+
+#Effectiveness plot per plant
+p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,nlines=9,
+                       myxlab= "Visit",
+                       myylab="Handled fruits")
+
+
+p2<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$pop,nlines=9,
+                       myxlab= "Visit",
+                       myylab="Handled fruits")
+```
