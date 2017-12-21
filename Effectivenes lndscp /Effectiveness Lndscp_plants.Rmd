@@ -158,18 +158,42 @@ mtsg_total<-cbind(mtsg_visits_long,mtsg_fruits_long)
 mm_total<-cbind(mm_visits_long,mm_fruits_long)
 
 #Adding columns pop and motif
+
+marti<-im_glm[im_glm$pop == 'Martinazo',]
+matas<-im_glm[im_glm$pop == 'Matasgordas',]
+
+mrt_total["pop"]<-NA
+mrt_total$pop<-marti$pop
+mrt_total["motif"]<-NA
+mrt_total$motif<-marti$motif
+
+mtsg_total["pop"]<-NA
+mtsg_total$pop<-matas$pop
+mtsg_total["motif"]<-NA
+mtsg_total$motif<-matas$motif
+
 mm_total["pop"]<-NA
 mm_total$pop<-mart_matas_visits$pop
 mm_total["motif"]<-NA
 mm_total$motif<-im_glm$motif
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,nlines=9,
-                       myxlab= "Visit",
-                       myylab="Handled fruits")
+p1<-effectiveness_plot(q1=mrt_total$visit_mean,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=9,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal/day")
 
 
-p2<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$pop,nlines=9,
-                       myxlab= "Visit",
-                       myylab="Handled fruits")
+p2<-effectiveness_plot(q1=mtsg_total$visit_mean,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=9,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal/day")
+
+
+p3<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$pop, pts.size=3, nlines=9,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal/day")
+
+p4<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.shape = mm_total$pop, pts.color=mm_total$motif, pts.size=3, nlines=12,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal/day")
+                      
 ```
