@@ -68,15 +68,15 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
     class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
     class_mut = if_else( mut == 0, "absent", if_else( mut < median, "weak", if_else( mut >= median, "strong", "ERROR" ))),
     combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
-    mutate(.,Motif = if_else( combination == "ant-absent_mut-absent","Absent",
-                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
-                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
-                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
-                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
-                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
-                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
-                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
-                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" )))))))))) %>% 
+    mutate(.,Motif = if_else( combination == "ant-absent_mut-absent","No_Interaction",
+                             if_else(combination == "ant-absent_mut-strong", "Mutualist",
+                             if_else(combination == "ant-absent_mut-weak", "Mutualist",
+                             if_else(combination == "ant-strong_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-strong_mut-weak", "Antagonist",
+                             if_else(combination == "ant-weak_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR" )))))))))) %>% 
     group_by(Motif) %>%
     summarise(count = n(),
               freq  = count/n_row) %>%
