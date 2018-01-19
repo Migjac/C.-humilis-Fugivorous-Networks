@@ -55,6 +55,28 @@ mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart
 #Without column unknown
 mm_fruits<-subset(mart_matas_fruits[,-7])
 
+#Multiplying by the probability of recruitment
+rabbit_weight=0.286
+rat_weight=0.286
+fox_weight=0.179
+badger_weight=0.179
+deer_weight=0.0115
+wildb_weight=0
+```
+
+
+Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
+```{r setup, include=FALSE}
+mm_fruits <-mutate(mm_fruits,
+    #Resize effects
+    rabbit = rabbit * rabbit_weight,
+    rat = rat * rat_weight,
+    fox = fox * fox_weight,
+    badger = badger * badger_weight,
+    deer = deer * deer_weight,
+    wildb= wildb * wildb_weight)
+
+
 #convert data.frame to matrix
 mm_fruits<-data.matrix(mm_fruits)
 
@@ -82,9 +104,9 @@ mm_total["motif"]<-NA
 mm_total$motif<-im_glm$motif
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,nlines=9,
+p1<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,pts.size=5, nlines=11,
                        myxlab= "Visit",
-                       myylab="Handled fruits")
+                       myylab="Handled fruits*Recrutiment")
 
 
 p2<-effectiveness_plot(q1=mm_total$visit_mean,q2=mm_total$fruit_mean, pts.color=mm_total$pop,nlines=9,
