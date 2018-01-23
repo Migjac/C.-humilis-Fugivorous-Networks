@@ -1,0 +1,40 @@
+---
+title: "Untitled"
+author: "Miguel Jacome"
+date: "22/1/2018"
+output: html_document
+---
+```{r}
+fenol_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_visits_fenol.csv")
+fv<-subset(fenol_visits[2:7])
+
+#convert data.frame to matrix
+fv<-data.matrix(fv)
+
+#mean and sum for each row (1)
+fv_mean<-apply(fv,1,mean)
+fv_sum<-apply(fv,1,sum)
+
+
+#Creating long shape with the means of each plant
+fv_long<-melt(fv_mean,id.vars="mean")
+colnames(fv_long) <- "mean_visits"
+fv_long_sum<-melt(fv_sum,id.vars="sum")
+colnames(fv_long_sum) <- "sum_visits"
+
+
+#Adding new columns of visits summaries 
+fenol_visits["mean_visits"]<-NA
+fenol_visits$mean_visits<-fv_long$mean_visits
+fenol_visits["sum_visits"]<-NA
+fenol_visits$sum_visits<-fv_long_sum$sum_visits
+
+
+
+
+fv_glmm<-lmer(mean_visits~inf_s+size_s+fruits_s+im_lda$sincr_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_visits)
+fv_glmm
+summary(fv_glmm)
+Anova(fv_glmm, type="III")
+```
+
