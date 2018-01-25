@@ -5,16 +5,8 @@ date: "18/1/2018"
 output: html_document
 ---
 
-ppp---
-title: "Interaction_Motifis"
-author: "Miguel Jacome"
-date: "13/10/2017"
-output: html_document
----
-
-
 Charging libraries
-```{r}
+```{r Used libraries}
 library(magrittr)
 library(dplyr)
 library(reshape2)
@@ -22,16 +14,19 @@ library(tidyr)
 library(ggplot2)
 ```
 
-Matrix
-```{r}
+
+Charging matrix of effectiveness of two populations (visit/day*fruits/day)
+```{r Matrix of effectiveness}
 matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/mart_matas_eff.csv")
+
+#Wthout "plant" and "unknown" column
 matrix_effects_resized<-matrix_effects_resized[,-1]
 matrix_effects_resized<-matrix_effects_resized[,-8]
 ```
 
 
-Settings. Minimize the effect of "weaks mutualist" we will downsize the effect of those moving the seeds less. The dispersal capacity was measured as the average weight of each mutualist, due to the seed dispersal distance is highly correlated with the body mass. The wildboars and deers where exclude because they are seed predators.
-```{r}
+Settings. We obtained the values of seedlings recruiment from the article of Fedriani and Delibes (2011). In this article they measured the recrutiment with: 1) ingested seeds of badger's leaved in open areas and beneath plants (similar to those that surrond our studied plants) and 2) defleshed seeds in open areas and beneath mother plants. We used this information to obtain the dispersal quality of the mutualists frugivorous. We used the recruitment values in open areas of the baddger as a proxy of the foxes (we assumed same seed handling behaviour). Instead for rabbits and rodents we used the recrutiment values of defleshed seeds beneath the mother plant (when these species feed itself, thay defleshed entirely the seeds and leaved ebeneath the mother plant). The wildboars and deers were excluded because they are seed predators.
+```{r Seedlings recrutiment values}
 rabbit_weight=0.286
 rat_weight=0.286
 fox_weight=0.179
@@ -40,8 +35,8 @@ badger_weight=0.179
 ```
 
 
-Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
-```{r setup, include=FALSE}
+To define the strengh of interaction for the interaction motifs we obtained the median of "true interactions". Matrix resized (efficiency*recrutiment) by average weights, and adding NA to obtain the median of non-zero interaction values
+```{r Median and dispersal quality, include=FALSE}
 matrix_effects_resized <-mutate(matrix_effects_resized,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
@@ -57,8 +52,10 @@ n_row <- nrow(matrix_effects_resized)
 my_matrix<-matrix_effects_resized
 ```
 
-Creating a function for the iteration results given the median. Creating a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox. Redesignd motifs
-```{r}
+
+We created a function for the iteration results given the median. Every value beneath the median will be considered as weak, values ≥ median as strong and 0 values as no interaction. The results are a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox (and a fraction of the deers). Because we have a poor pool of plants, we redesigned  the 9 motifs to 4.*Notice, that a small % of the seeds ingested by deers could escaped the predation process via spitting Castañeda et al. 2017). We divide the interaction of the deers in two: antagonistic deers (deer_a) and mutualistic deers (deer_m). The values of the mutualistic deer represent
+```{r Function to obtain Interaction Motifs}
+
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   counts <- mutate( my_matrix,
     #Compute ant and mut effects
@@ -81,20 +78,20 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
     summarise(count = n(),
               freq  = count/n_row) %>%
     mutate(iteration = iteration) 
-    
-      
-  
+
   return( counts )
 }
 ```
 
-```{r}
+
+We generated a matrix for linear discriminant analysis
+```{r Matrix for LDA}
 write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_colapsed5.csv")
 ```
 
 
-Creating a resample with the frequency of each typology based on the created function
-```{r}
+We randomized the frequency of apperance of every motif to analyzed the probability of each motif in oour interaction. Thus, we resampled 10,000 times with the frequency of each typology based on the created function
+```{r Randomized frequencies}
 #Define boostrap_df. We obtained the number of plants in eahc typology
 boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median, n_row)
 #Loop to generate the distribution
@@ -107,14 +104,14 @@ boostrap_df <- rbind(counts, boostrap_df)
 ```
 
 
-We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas  , perhps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.
+*We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas, perhaps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.*
 ```{r}
 write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_mart_matas_mut_deer.csv")
 ```
 
 
 Boxplot for the frequencies of interaction typologies for both populations
-```{r}
+```{r Boxplots interaction typologies frequency}
 #Martinazo
 mart_im<-read.csv("boostrap_mart.csv")
 
@@ -130,14 +127,13 @@ boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction mot
 #Both Population
 marti_matas_im<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_mart_matas_mut_deer.csv")
 
-boxplot(marti_matas_im$count~marti_matas_im$Motif,data=marti_matas_im, main="interaction motifs", 
-  	xlab="Interaction motifs", ylab="frequency")
+boxplot(marti_matas_im$count~marti_matas_im$Motif,data=marti_matas_im, xlab="Interaction motifs", ylab="Frequency")
 ```
 
 
 
 Reorganizing the typologies into columns to analyze the significance of each typology given the expected and observed data
-```{r, no-colapsed}
+```{r Motifs as columns}
 
 #Martinazo
 bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
@@ -146,7 +142,7 @@ bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combin
 bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
 
 #Both populations
-marti_matas_im<-marti_matas_im[,-4]
+marti_matas_im<-marti_matas_im[,-4] #eliminate iteration column
 bs_marti_matas<-select (marti_matas_im, Motif, count, iteration) %>% spread(.,key=Motif, value=count, fill=0)
 
 write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas3.csv")
@@ -155,7 +151,7 @@ write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Netw
 
 
 Creating matrix of the observed and expected data
-```{r}
+```{r Matrixs of radom data and observed}
 #"Excluding" the first row, that contain the "observed data" (row 10001)
 bs_mar_mat_expected<-bs_marti_matas[-c(10001), ]
 
@@ -174,52 +170,54 @@ bs3_sd<-apply(bs3,2,sd)
 bs_mar_mat_observed<-bs_marti_matas[c(10001), ]
 bs_obs<-subset(bs_mar_mat_observed[,-1])
 bs_o<-data.matrix(bs_obs)
+```
 
-
+We tested the significance of appeareance of each motif in our two populations. We like two if the interactions were generated by a random a pattern or not.
+```{r Z test for significance of each motif}
 #Z test for each motif
-
 alpha = .05 
 z.half.alpha = qnorm(1-alpha/2) 
 c(-z.half.alpha, z.half.alpha) 
 #[1] -1.959964  1.959964
 
-#ABSENT
-z.abs <- (bs_obs$Absent - mean(bs2$Absent))/sd(bs2$Absent) #3.081169
+#No interaction
+z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #3.081169
 # Lower 1−tailed test:
-pnorm(z.abs, lower.tail=T) #p-value: 0.9989691
+pnorm(z.abs, lower.tail=T) #p-value: 0.9999538
 # Upper 1−tailed test:
-pnorm(z.abs, lower.tail=F) #p−value: 0.001030947
+pnorm(z.abs, lower.tail=F) #p−value: 4.623394e-05
 #Larger than expected
 
 #MUTUALISM_ANTAGONISM
-z.mu_ant <- (bs_obs$Mutualism_Antagonism - mean(bs2$Mutualism_Antagonism))/sd(bs2$Mutualism_Antagonism) #-0.1563118
+z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-0.1563118
 # Lower 1−tailed test:
-pnorm(z.mu_ant, lower.tail=T) #p-value: 0.4378936
+pnorm(z.mu_ant, lower.tail=T) #p-value: 0.7808507
 # Upper 1−tailed test:
-pnorm(z.mu_ant, lower.tail=F) #p−value: 0.5621064
+pnorm(z.mu_ant, lower.tail=F) #p−value: 0.2191493
 #Random pattern
 
 
-#MUTUALISM
-z.mut <- (bs_obs$StrongW_Mutualism - mean(bs2$StrongW_Mutualism))/sd(bs2$StrongW_Mutualism) #-1.981089
+#MUTUALIST
+z.mut <- (bs_obs$Mutualist - mean(bs2$Mutualist))/sd(bs2$Mutualist) #-1.981089
 # Lower 1−tailed test:
-pnorm(z.mut, lower.tail=T) #p-value: 0.02379064
+pnorm(z.mut, lower.tail=T) #p-value: 0.006255022
 # Upper 1−tailed test:
-pnorm(z.mut, lower.tail=F) #p−value: 0.9762094
+pnorm(z.mut, lower.tail=F) #p−value: 0.993745
 #Less than expected
 
-#ANTAGONISM
-z.ant <- (bs_obs$StrongW_Antagonism - mean(bs2$StrongW_Antagonism))/sd(bs2$StrongW_Antagonism) #-0.6603949
+#ANTAGONIST
+z.ant <- (bs_obs$Antagonist - mean(bs2$Antagonist))/sd(bs2$Antagonist) #-0.6603949
 # Lower 1−tailed test:
-pnorm(z.ant, lower.tail=T) #p-value: 0.2545002
+pnorm(z.ant, lower.tail=T) #p-value: 0.01413969
 # Upper 1−tailed test:
-pnorm(z.ant, lower.tail=F) #p−value: 0.7454998
-#Random pattern
+pnorm(z.ant, lower.tail=F) #p−value: 0.9143158
+#Less than expected
+
 ```
 
 
-#Using GGplot to graph all the motifs
-```{r}
+Bar plot of interaction motifs
+```{r Bar plot for interaction motifs}
 ###Expected graph
 #Creating long shape with the means of each motif
 expect_data<-melt(bs3_mean,id.vars="Int_motif")
@@ -231,7 +229,7 @@ expect_data <- add_rownames(expect_data, "variable")
 expect_data<-melt(bs3_mean,id.vars="Int_motif")
 expect_data <- add_rownames(expect_data, "variable")
 expect_data["Data"]<-NA          #adding a new column for data type
-expect_data$Data<-"Expected"     
+expect_data$Data<-"Random"     
 expect_data["SD"]<-NA  #adding a new column for standard deviation
 expect_data$SD<-bs3_sd #adding the values of standard deviation
 
@@ -243,7 +241,7 @@ obs_data<-melt(bs_o,id.vars="Int_motif")
 obs_data<-subset(obs_data [,-1])
 colnames(obs_data)<-c("variable", "value")
 obs_data["Data"]<-NA        #adding a new column for data type
-obs_data$Data<-"1Observed" 
+obs_data$Data<-"Observed" 
 obs_data["SD"]<-NA     #adding a new column for standard deviation. We leave as NA because we only measure de frequency of appearence of each typology, also is helpful to the graph esthetic.
 
 
@@ -253,17 +251,20 @@ total<-rbind(obs_data,expect_data) #Joining expected and observed data
 #ggplot of the observed frequencies of the motifs 
 ggplot(total,aes(x=variable,y=value, fill=Data))+
        geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
-       scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
+       scale_fill_discrete(name="Data")+ xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
        geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
-                width=.2,   position=position_dodge(.9))+
-                scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-Antagonist","Antagonist"))+
-     #giving the appropiate order of the typologies from mutualist to antagonist
-                theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ 
-                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
+                width=0.2,   position=position_dodge(0.9))+
+                scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-Antagonist","Antagonist"))+ 
+                annotate(geom="text", x=1, y=21, label="p<0.001")+annotate(geom="text", x=2, y=35, label="p=0.006")+annotate(geom="text", x=3, y=21, label="N.S.") +annotate(geom="text", x=4, y=21, label="p=0.014")+theme(legend.position = c(0.9,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
+                
+
+
 
 ```
 
-###Discriminant analysis
+To analyze the relationship between the plants phenology and e performed a discriminant analysis
 ```{r}
 im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
 
@@ -275,14 +276,11 @@ cor(im_lda[2:9])
 
 
 #Discriminant analysis
-im.lda<-lda(im_lda$motif~ im_lda$inf_s+im_lda$size_s+im_lda$fruits_s+im_lda$fruit_set_s+im_lda$del.area_s+im_lda$nn_s+im_lda$dens_s, data=im_lda)
+im.lda<-lda(im_lda$motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+sincr_s, data=im_lda)
 im.lda
 im_p<-predict(im.lda)
-im.lda.p<-predict(im_lda, newdata=im_lda[,c(2:9)])$class     #predicted categories
-table(im.lda$class,im_lda[,2])                                   #table with misclassifications, due the selected variables
 
-
-im.lda1<-lda(im_lda$motif~ im_lda$inf_s+im_lda$size_s+im_lda$fruits_s+im_lda$fruit_set_s+im_lda$del.area_s+im_lda$nn_s+im_lda$dens_s, data=im_lda,CV=TRUE)             #Cross validation analysis
+im.lda1<-lda(im_lda$motif~ im_lda$inf_s+im_lda$size_s+im_lda$sincr_s+im_lda$fruits_s+im_lda$fruit_set_s+im_lda$del.area_s+im_lda$nn_s+im_lda$dens_s, data=im_lda,CV=TRUE)             #Cross validation analysis
 table(im.lda1$class,im_lda[,2])                               #It seems that the worst classification i for strong and weak mutualism
 
 
@@ -308,19 +306,22 @@ sum(diag(prop.table(ct)))
 
 
 #Plot for dicriminant analysis for motif
-p<-ggplot(im_lda, aes(LD1, LD2, color= motif))+geom_point()+
+p<-ggplot(im_lda, aes(LD1, LD2, colour= motif))+geom_point(size= 3, stroke=2)+
   stat_ellipse(type = "t",linetype=5)+xlim(-6,5) +theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
 
+p+labs(colour="Interaction Motifs")+theme(legend.position = c(0.12,0.88))+theme(legend.title =element_text(size=rel(1.4)))+theme(legend.text=element_text(size=rel(1.2)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+
 #Plot for dicriminant analysis for population
-p1<-ggplot(im_lda, aes(LD1, LD2, color= pop))+geom_point()+
-  stat_ellipse(type = "t",linetype=3)+xlim(-6,5)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+p1<-ggplot(im_lda, aes(LD1, LD2, shape= factor(pop)))+geom_point(color="black",fill="white", size= 4, stroke=2)+
+  stat_ellipse(type = "t",linetype=5)+xlim(-5,5)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
   
-  
+p1+geom_point(aes(colour= factor(im_lda$motif)), fill="white", size= 3)+labs(shape="Population", colour="Interaction Motifs")+ theme(legend.position = c(0.12,0.8))+theme(legend.title =element_text(size=rel(1.4)))+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+
 ##Plots
 library(devtools)
 install_github("fawda123/ggord")
 library(ggord)
-new_lab <- list(im_lda$inf_s = 'INF', im_lda$size_s = 'SIZE', im_lda$sincr_s = 'SINCR',im_lda$fruits_s = 'FRUITS',im_lda$fruit_set_s = 'FRUIT_SET',im_lda$del.area_s = 'AREA',im_lda$nn_s = 'NN',im_lda$dens_s = 'DENS')
 
 ggord(im.lda, im_lda$motif, ellipse= TRUE, poly=FALSE)
 
@@ -328,7 +329,7 @@ ggord(im.lda, im_lda$pop, ellipse= TRUE, poly=FALSE)
 
 # Wilk's lambda, stepwise selection
 library(klaR)
-greedy.wilks(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda, niveau = 0.99)
+greedy.wilks(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+sincr_s,data = im_lda, niveau = 0.99)
 #-----------------------------------------------------------------------------
 
 # Function to plot a scatterplot matrix with a classification result
@@ -336,6 +337,142 @@ library(klaR)
 classscatter(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda, method = "lda")
 
 ```
+
+
+```{r, by Population}
+
+###Matasgordas
+im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
+
+#selecting only Matasgordas
+im_lda_Mat<-subset(im_glm[1:46,])        
+
+#Correlation matriz for explanatory variables
+cor(im_lda_Mat[2:9])
+
+
+#Discriminant analysis
+im.lda.Mat<-lda(im_lda_Mat$motif~ im_lda_Mat$inf_s+im_lda_Mat$size_s+im_lda_Mat$fruits_s+im_lda_Mat$fruit_set_s+im_lda_Mat$del.area_s+im_lda_Mat$nn_s+im_lda_Mat$dens_s, data=im_lda_Mat)
+im.lda.Mat
+im_p<-predict(im.lda.Mat)
+im.lda.Mat1<-lda(im_lda_Mat$motif~ im_lda_Mat$inf_s+im_lda_Mat$size_s+im_lda_Mat$fruits_s+im_lda_Mat$fruit_set_s+im_lda_Mat$del.area_s+im_lda_Mat$nn_s+im_lda_Mat$dens_s, data=im_lda_Mat,CV=TRUE)            
+
+#Cross validation analysis
+table(im.lda.Mat1$class,im_lda_Mat[,2])                               #It seems that the worst classification i for strong and weak mutualism
+
+
+#Variables useful to plot the tupologies in the coordinates LD1 and LD2
+im_lda_Mat["LD1"]<-NA
+im_lda_Mat$LD1<-im_p$x[,1]
+
+im_lda_Mat["LD2"]<-NA
+im_lda_Mat$LD2<-im_p$x[,2]
+
+#Adding to the main data frame the predicted motif 
+im_glm["predict_motif"]<-NA
+im_glm$predict_motif<-im.lda.Mat1$class
+
+
+write.csv(im_glm, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/im_glm4.csv")
+
+#percent correct for eahc category  
+ct <- table(im_lda_Mat$motif, im.lda.Mat1$class)
+diag(prop.table(ct, 1))
+# total percent correct
+sum(diag(prop.table(ct)))
+
+
+#Plot for dicriminant analysis for motif
+p<-ggplot(im_lda_Mat, aes(LD1, LD2, color= motif))+geom_point()+
+  stat_ellipse(type = "t",linetype=5)+xlim(-6,9) +theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+
+##Plots
+library(devtools)
+install_github("fawda123/ggord")
+library(ggord)
+new_lab <- list(im_lda_Mat$inf_s = 'INF', im_lda_Mat$size_s = 'SIZE', im_lda_Mat$sincr_s = 'SINCR',im_lda_Mat$fruits_s = 'FRUITS',im_lda_Mat$fruit_set_s = 'FRUIT_SET',im_lda_Mat$del.area_s = 'AREA',im_lda_Mat$nn_s = 'NN',im_lda_Mat$dens_s = 'DENS')
+
+ggord(im.lda.Mat, im_lda_Mat$motif, ellipse= TRUE, poly=FALSE)
+
+
+# Wilk's lambda, stepwise selection
+library(klaR)
+greedy.wilks(motif~ inf_s+size_s+fruits_s+sincr_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda_Mat, niveau = 0.99)
+
+# Function to plot a scatterplot matrix with a classification result
+library(klaR)
+classscatter(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda_Mat, method = "lda")
+
+#_______________________________________________________________________________________
+###Martinazo
+#selecting only Matasgordas
+im_lda_Mart<-subset(im_glm[47:70,])        
+
+#Correlation matriz for explanatory variables
+cor(im_lda_Mart[2:9])
+
+
+#Discriminant analysis
+im.lda.Mart<-lda(im_lda_Mart$motif~ im_lda_Mart$inf_s+im_lda_Mart$size_s+im_lda_Mart$fruits_s+im_lda_Mart$fruit_set_s+im_lda_Mart$del.area_s+im_lda_Mart$nn_s+im_lda_Mart$dens_s, data=im_lda_Mart)
+im.lda.Mart
+im_p<-predict(im.lda.Mart)
+im.lda.Mart1<-lda(im_lda_Mart$motif~ im_lda_Mart$inf_s+im_lda_Mart$size_s+im_lda_Mart$fruits_s+im_lda_Mart$fruit_set_s+im_lda_Mart$del.area_s+im_lda_Mart$nn_s+im_lda_Mart$dens_s, data=im_lda_Mart,CV=TRUE)            
+
+#Cross validation analysis
+table(im.lda.Mart1$class,im_lda_Mart[,2])                               #It seems that the worst classification i for strong and weak mutualism
+
+
+#Variables useful to plot the tupologies in the coordinates LD1 and LD2
+im_lda_Mart["LD1"]<-NA
+im_lda_Mart$LD1<-im_p$x[,1]
+
+im_lda_Mart["LD2"]<-NA
+im_lda_Mart$LD2<-im_p$x[,2]
+
+#Adding to the main data frame the predicted motif 
+im_glm["predict_motif"]<-NA
+im_glm$predict_motif<-im.lda.Mart1$class
+
+
+write.csv(im_glm, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/im_glm4.csv")
+
+#percent correct for eahc category  
+ct <- table(im_lda_Mart$motif, im.lda.Mart1$class)
+diag(prop.table(ct, 1))
+# total percent correct
+sum(diag(prop.table(ct)))
+
+
+#Plot for dicriminant analysis for motif
+p<-ggplot(im_lda_Mart, aes(LD1, LD2, color= motif))+geom_point()+
+  stat_ellipse(type = "t",linetype=5)+xlim(-6,9) +theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+
+##Plots
+library(devtools)
+install_github("fawda123/ggord")
+library(ggord)
+new_lab <- list(im_lda_Mart$inf_s = 'INF', im_lda_Mart$size_s = 'SIZE', im_lda_Mart$sincr_s = 'SINCR',im_lda_Mart$fruits_s = 'FRUITS',im_lda_Mart$fruit_set_s = 'FRUIT_SET',im_lda_Mart$del.area_s = 'AREA',im_lda_Mart$nn_s = 'NN',im_lda_Mart$dens_s = 'DENS')
+
+ggord(im.lda.Mart, im_lda_Mart$motif, ellipse= TRUE, poly=FALSE)
+
+
+# Wilk's lambda, stepwise selection
+library(klaR)
+greedy.wilks(motif~ inf_s+size_s+fruits_s+sincr_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda_Mart, niveau = 0.99)
+#-----------------------------------------------------------------------------
+
+# Function to plot a scatterplot matrix with a classification result
+library(klaR)
+classscatter(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = im_lda_Mart, method = "lda")
+
+
+```
+
+
+
+
 
 
 

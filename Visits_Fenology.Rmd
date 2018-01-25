@@ -4,7 +4,7 @@ author: "Miguel Jacome"
 date: "22/1/2018"
 output: html_document
 ---
-```{r}
+```{r Visits}
 fenol_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_visits_fenol.csv")
 fv<-subset(fenol_visits[2:7])
 
@@ -26,15 +26,130 @@ colnames(fv_long_sum) <- "sum_visits"
 #Adding new columns of visits summaries 
 fenol_visits["mean_visits"]<-NA
 fenol_visits$mean_visits<-fv_long$mean_visits
+
 fenol_visits["sum_visits"]<-NA
 fenol_visits$sum_visits<-fv_long_sum$sum_visits
 
 
 
-
-fv_glmm<-lmer(mean_visits~inf_s+size_s+fruits_s+im_lda$sincr_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_visits)
+#GLMM visits
+fv_glmm<-glm(mean_visits~inf_s+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = fenol_visits)
 fv_glmm
 summary(fv_glmm)
-Anova(fv_glmm, type="III")
+anova(fv_glmm, test="Chisq")
+
+fv_glmm2<-lmer(sum_visits~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_visits)
+fv_glmm2
+summary(fv_glmm2)
+Anova(fv_glmm2, type="III")
+
+fv_glmm3<-lmer(motif~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop), family=binomial, data = fenol_visits)
+fv_glmm3
+summary(fv_glmm3)
+Anova(fv_glmm3, type="III")
+
 ```
 
+```{r Handled fruits}
+fenol_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_fruits_fenol.csv")
+ff<-subset(fenol_fruits[2:7])
+
+#convert data.frame to matrix
+ff<-data.matrix(ff)
+
+#mean and sum for each row (1)
+ff_mean<-apply(ff,1,mean)
+ff_sum<-apply(ff,1,sum)
+
+
+#Creating long shape with the means of each plant
+ff_long<-melt(ff_mean,id.vars="mean")
+colnames(ff_long) <- "mean_fruits"
+ff_long_sum<-melt(ff_sum,id.vars="sum")
+colnames(ff_long_sum) <- "sum_fruits"
+
+
+#Adding new columns of visits summaries 
+fenol_fruits["mean_fruits"]<-NA
+fenol_fruits$mean_fruits<-ff_long$mean_fruits
+
+fenol_fruits["sum_fruits"]<-NA
+fenol_fruits$sum_fruits<-ff_long_sum$sum_fruits
+
+
+
+#GLMM visits
+ff_glmm<-glm(mean_fruits~inf_s+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = fenol_fruits)
+ff_glmm
+summary(ff_glmm)
+anova(ff_glmm, test="Chisq")
+
+ff_glmm2<-lmer(sum_fruits~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_fruits)
+ff_glmm2
+summary(ff_glmm2)
+anova(ff_glmm2, test="Chisq")
+Anova(ff_glmm2, type="III")
+
+ff_glmm3<-glm(sum_fruits~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = fenol_fruits)
+ff_glmm3
+summary(ff_glmm3)
+anova(ff_glmm3, test="Chisq")
+Anova(ff_glmm3, type="III")
+
+m<-glm(fenol_fruits$sum_fruits~motif, data= fenol_fruits)
+summary(m)
+
+m1<-glm(sum_visits~motif, data=fenol_visits)
+summary(m1)
+```
+
+
+```{r Efficiency}
+fenol_eff<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
+
+#Matrix only with animals interaction
+fe<-subset(fenol_eff[2:7])
+
+#convert data.frame to matrix
+fe<-data.matrix(fe)
+
+#mean and sum for each row (1)
+fe_mean<-apply(fe,1,mean)
+fe_sum<-apply(fe,1,sum)
+
+
+#Creating long shape with the means of each plant
+fe_long<-melt(fe_mean,id.vars="mean")
+colnames(fe_long) <- "mean_eff"
+fe_long_sum<-melt(fe_sum,id.vars="sum")
+colnames(fe_long_sum) <- "sum_eff"
+
+
+#Adding new columns of visits summaries 
+fenol_eff["mean_eff"]<-NA
+fenol_eff$mean_eff<-fe_long$mean_eff
+
+fenol_eff["sum_eff"]<-NA
+fenol_eff$sum_eff<-fe_long_sum$sum_eff
+
+
+
+#GLMM visits
+fe_glmm<-glm(mean_eff~inf_s+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = fenol_eff)
+fe_glmm
+summary(fe_glmm)
+anova(fe_glmm, test="Chisq")
+
+fe_glmm2<-lmer(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_eff)
+fe_glmm2
+summary(fe_glmm2)
+anova(fe_glmm2, test="Chisq")
+Anova(fe_glmm2, type="III")
+
+fe_glmm3<-glm(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = fenol_eff)
+fe_glmm3
+summary(fe_glmm3)
+anova(fe_glmm3, test="Chisq")
+Anova(fe_glmm3, type="III")
+
+```
