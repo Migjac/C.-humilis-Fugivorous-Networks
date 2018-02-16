@@ -18,20 +18,59 @@ library(devtools)
 Opening a matrix file with weighted visits of frugivores in individual plants, the "row.names=1" is necessary to run the model and to detect the "name of plants" in the matrix. 
 *Note: visit frequency= animal-visit-days/total-survey days.*
 ```{r opening visits matrix}
+#Martinazo
+mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Matasgordas
+matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+
 #Both populations
 mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits_pop.csv",header=TRUE,check.names=FALSE,row.names=1)
+```
 
+```{r Transform visits matrix}
 #Without column pop
+mrt_visits<-subset(mart_v[,-7])
+
+mtsg_visits<-subset(matas_v[,-7])
+
 mm_visits<-subset(mart_matas_visits[,-7])
 
 #convert data.frame to matrix
+mrt_visits<-data.matrix(mrt_visits)
+
+mtsg_visits<-data.matrix(mtsg_visits)
+
 mm_visits<-data.matrix(mm_visits)
 
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+mrt_visits_sum<-apply(mrt_visits,1,sum)
+mrt_visits_mean<-apply(mrt_visits,1,mean)
+mrt_visits_sd<-apply(mrt_visits,1,sd)
+
+mtsg_visits_sum<-apply(mtsg_visits,1,sum)
+mtsg_visits_mean<-apply(mtsg_visits,1,mean)
+mtsg_visits_sd<-apply(mtsg_visits,1,sd)
+
 mm_visits_sum<-apply(mm_visits,1,sum)
+mm_visits_mean<-apply(mm_visits,1,mean)
 mm_visits_sd<-apply(mm_visits,1,sd)
 
 #Creating long shape with the means of each motif
+mrt_visits_long<-melt(mrt_visits_mean,id.vars="mean")
+colnames(mrt_visits_long) <- "visit_mean"
+mrt_visits_long["SE"]<-NA  #adding a new column for standard error
+mrt_visits_long$SE<-mrt_visits_sd/sqrt(length(mrt_visits_mean)) #adding the values of standard error
+mrt_visits_long["sum"]<-NA
+mrt_visits_long$sum<-mrt_visits_sum
+
+mtsg_visits_long<-melt(mtsg_visits_mean,id.vars="mean")
+colnames(mtsg_visits_long) <- "visit_mean"
+mtsg_visits_long["SE"]<-NA  #adding a new column for standard error
+mtsg_visits_long$SE<-mtsg_visits_sd/sqrt(length(mtsg_visits_mean)) #adding the values of standard error
+mtsg_visits_long["sum"]<-NA
+mtsg_visits_long$sum<-mtsg_visits_sum
 
 mm_visits_long<-melt(mm_visits_sum,id.vars="sum")
 colnames(mm_visits_long) <- "visit_sum"
@@ -39,20 +78,14 @@ mm_visits_long["SE"]<-NA  #adding a new column for standard error
 mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_sum)) #adding the values of standard error
 
 #naming the first column
+mrt_visits_long <- add_rownames(mrt_visits_long, "plant")
+mtsg_visits_long <- add_rownames(mtsg_visits_long, "plant")
 mm_visits_long <- add_rownames(mm_visits_long, "plant")
 
 ```
 
 
-Opening a matrix file with weighted links with frugivores fruit removal in individual plants. Other specifications of the matrix are described in the fruits visits file. *Note: fruit removal= animal-fruits-days/total-fruits.*
-
-```{r}
-#Both poulations
-mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
-
-
-#Without column unknown
-mm_fruits<-subset(mart_matas_fruits[,-7])
+```{r Recruitment probability}
 
 #Multiplying by the probability of recruitment
 rabbit_weight=0.286
@@ -61,11 +94,51 @@ fox_weight=0.179
 badger_weight=0.179
 deer_weight=0.0115
 wildb_weight=0
+
+```
+
+
+Opening a matrix file with weighted links with frugivores fruit removal in individual plants. Other specifications of the matrix are described in the fruits visits file. *Note: fruit removal= animal-fruits-days/total-fruits.*
+```{r Transform fruits matrix}
+#Martinazo
+mart_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Matasgordas
+matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+#Both poulations
+mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+
+#Without column unknown
+
+mrt_fruits<-subset(mart_fruits[,-7])
+mtsg_fruits<-subset(matas_fruits[,-7])
+mm_fruits<-subset(mart_matas_fruits[,-7])
 ```
 
 
 Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
 ```{r setup, include=FALSE}
+mrt_fruits <-mutate(mrt_fruits,
+    #Resize effects
+    rabbit = rabbit * rabbit_weight,
+    rat = rat * rat_weight,
+    fox = fox * fox_weight,
+    badger = badger * badger_weight,
+    deer = deer * deer_weight,
+    wildboar= wildboar * wildb_weight)
+
+mtsg_fruits <-mutate(mtsg_fruits,
+    #Resize effects
+    rabbit = rabbit * rabbit_weight,
+    rat = rat * rat_weight,
+    fox = fox * fox_weight,
+    badger = badger * badger_weight,
+    deer = deer * deer_weight,
+    wildboar= wildboar * wildb_weight)
+
+
 mm_fruits <-mutate(mm_fruits,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
@@ -77,38 +150,95 @@ mm_fruits <-mutate(mm_fruits,
 
 
 #convert data.frame to matrix
+mrt_fruits<-data.matrix(mrt_fruits)
+mtsg_fruits<-data.matrix(mtsg_fruits)
 mm_fruits<-data.matrix(mm_fruits)
 
+
+
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
+mrt_fruits_mean<-apply(mrt_fruits,1,mean)
+mrt_fruits_sd<-apply(mrt_fruits,1,sd)
+
+mtsg_fruits_mean<-apply(mtsg_fruits,1,mean)
+mtsg_fruits_sd<-apply(mtsg_fruits,1,sd)
+
 mm_fruits_mean<-apply(mm_fruits,1,mean)
 mm_fruits_sd<-apply(mm_fruits,1,sd)
 
 #Creating long shape with the means of each motif
+mrt_fruits_long<-melt(mrt_fruits_mean,id.vars="mean")
+colnames(mrt_fruits_long) <- "fruit_mean"
+mrt_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mrt_fruits_long$SE_f<-mrt_fruits_sd/sqrt(length(mrt_fruits_mean)) #adding the values of standard deviation
+
+mtsg_fruits_long<-melt(mtsg_fruits_mean,id.vars="mean")
+colnames(mtsg_fruits_long) <- "fruit_mean"
+mtsg_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
+mtsg_fruits_long$SE_f<-mtsg_fruits_sd/sqrt(length(mtsg_fruits_mean)) #adding the values of standard deviation
+
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
 mm_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mm_fruits_long$SE_f<-mm_fruits_sd/sqrt(length(mm_fruits_mean)) #adding the values of standard deviation
 
 #naming the first column
-mm_fruits_long <- add_rownames(mm_fruits_long, "plant")
+mrt_fruits_long <- add_rownames(mrt_fruits_long, "plants")
+mrt_fruits_long<-mrt_fruits_long[,-1]
 
+mtsg_fruits_long <- add_rownames(mtsg_fruits_long, "plants")
+mtsg_fruits_long<-mtsg_fruits_long[,-1]
+
+mm_fruits_long <- add_rownames(mm_fruits_long, "plant")
 mm_fruits_long<-mm_fruits_long[,-1]
+
+
 #Join coulumns
+mrt_total<-cbind(mrt_visits_long,mrt_fruits_long)
+mtsg_total<-cbind(mtsg_visits_long,mtsg_fruits_long)
 mm_total<-cbind(mm_visits_long,mm_fruits_long)
 
+
 #Adding columns pop and motif
+im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
+
+marti<-im_glm[im_glm$pop == 'Martinazo',]
+matas<-im_glm[im_glm$pop == 'Matasgordas',]
+
+mrt_total["pop"]<-NA
+mrt_total$pop<-marti$pop
+mrt_total["motif"]<-NA
+mrt_total$motif<-marti$combination
+
+mtsg_total["pop"]<-NA
+mtsg_total$pop<-matas$pop
+mtsg_total["motif"]<-NA
+mtsg_total$motif<-matas$combination
+
+
 mm_total["pop"]<-NA
 mm_total$pop<-mart_matas_visits$pop
 mm_total["motif"]<-NA
-mm_total$motif<-im_glm$motif
+mm_total$motif<-im_glm$combination
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean,pts.shape=mm_total$pop, pts.color= mm_total$motif,pts.size=5, nlines=11,
-                       myxlab= "Visit",
-                       myylab="Handled fruits*Recrutiment")
+p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=20,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-p2<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$pop,nlines=9,
-                       myxlab= "Visit",
-                       myylab="Handled fruits")
+p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.8,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+
+
+p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$pop, pts.size=3, nlines=9,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal*Recruitment")
+
+
+p4<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=3, nlines=20,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal*Recruitment")
+
 ```
