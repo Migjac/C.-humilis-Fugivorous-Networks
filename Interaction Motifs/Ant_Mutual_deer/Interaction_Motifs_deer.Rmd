@@ -70,9 +70,9 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
                              if_else(combination == "ant-absent_mut-weak", "Mutualist",
                              if_else(combination == "ant-strong_mut-absent", "Antagonist", 
                              if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
-                             if_else(combination == "ant-strong_mut-weak", "Antagonist-MW",
+                             if_else(combination == "ant-strong_mut-weak", "Mutualist-Antagonist",
                              if_else(combination == "ant-weak_mut-absent", "Antagonist", 
-                             if_else(combination == "ant-weak_mut-strong", "Mutualist-AW",
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist-Antagonist",
                              if_else( combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR" )))))))))) %>% 
     group_by(motif) %>%
     summarise(count = n(),
@@ -127,7 +127,7 @@ boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction mot
   	xlab="Interaction motifs", ylab="frequency")
 
 #Both Population
-marti_matas_im<-read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_mart_matas_mut_deer.csv")
+marti_matas_im<-boostrap_df
 
 boxplot(marti_matas_im$count~marti_matas_im$motif,data=marti_matas_im, xlab="Interaction motifs", ylab="Frequency")
 ```
@@ -182,19 +182,19 @@ c(-z.half.alpha, z.half.alpha)
 #[1] -1.959964  1.959964
 
 #No interaction
-z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #0.7623315
+z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #0.7411706
 # Lower 1−tailed test:
 pnorm(z.abs, lower.tail=T) #p-value: 0.7770689
 # Upper 1−tailed test:
 pnorm(z.abs, lower.tail=F) #p−value: 0.2229311
-#Larger than expected
+#Random pattern
 
 #MUTUALISM_ANTAGONISM
 z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-0.525858
 # Lower 1−tailed test:
-pnorm(z.mu_ant, lower.tail=T) #p-value: 0.2994934
+pnorm(z.mu_ant, lower.tail=T) #p-value: 0.05688707
 # Upper 1−tailed test:
-pnorm(z.mu_ant, lower.tail=F) #p−value: 0.7005066
+pnorm(z.mu_ant, lower.tail=F) #p−value: 0.9431129
 #Random pattern
 
 #MUTUALIST
@@ -263,7 +263,20 @@ total<-rbind(obs_data,expect_data) #Joining expected and observed data
 
 
 #ggplot of the observed frequencies of the motifs 
-ggplot(total,aes(x=variable,y=value, fill=Data))+
+
+four_motifs<-ggplot(total,aes(x=variable,y=value, fill=Data))+
+       geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
+       scale_fill_discrete(name="Data")+ xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
+       geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
+                width=0.2,   position=position_dodge(0.9))+
+                scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-Antagonist","Antagonist"))+ 
+                annotate(geom="text", x=1, y=19, label="N.S.")+annotate(geom="text", x=2, y=22, label="N.S.")+annotate(geom="text", x=3, y=24, label="p=0.057") +annotate(geom="text", x=4, y=21, label="p=0.078")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
+                
+
+#####
+six_motifs<-ggplot(total,aes(x=variable,y=value, fill=Data))+
        geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
        scale_fill_discrete(name="Data")+ xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
        geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
@@ -280,7 +293,9 @@ ggplot(total,aes(x=variable,y=value, fill=Data))+
 
 To analyze the relationship between the plants phenology and e performed a discriminant analysis
 ```{r}
-im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
+im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda_4.csv")
+
+im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda_6.csv")
 
 #selecting only the explanatory variables
 im_lda<-subset(im_glm[11:22])        
@@ -482,49 +497,3 @@ classscatter(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,dat
 
 
 ```
-
-
-
-
-
-
-
-
-
-
-####Changing the names of each typology, for a shorter name
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-absent"]<-"Abs"
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-strong"]<-"SM"
-levels(total$variable)[levels(total$variable)=="ant-absent_mut-weak"]<-"WM"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-absent"]<-"SA"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-strong"]<-"SM / SA"
-levels(total$variable)[levels(total$variable)=="ant-strong_mut-weak"]<-"WM / SA"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-absent"]<-"WA"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-strong"]<-"SM / WA"
-levels(total$variable)[levels(total$variable)=="ant-weak_mut-weak"]<-"WM / WA"
-
-#ggplot of the observed frequencies of the motifs 
-ggplot(total,aes(x=variable,y=value, fill=Data))+
-       geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
-       scale_fill_discrete(name="Data")+ xlab("Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,18, 2))+
-       geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
-                width=.2,   position=position_dodge(.9))+                  
-                scale_x_discrete(limits= c("Abs", "SM", "WM","SM / WA", "SM / SA", "WM / WA","WM / SA","WA", "SA"))+     #giving the appropiate order of the typologies from mutualist to antagonist
-                theme(axis.text.x = element_text(angle = 60, hjust = 1))+scale_fill_manual(values = c("black", "white"))+ 
-                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
-
-
-
-im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/im_glm.csv")
-
- #Creating a new column with colapsed cathegories
-im_lreg <- mutate(im_glm,                    
-        Motif = if_else( combination == "ant-absent_mut-absent","Absent",
-                             if_else(combination == "ant-absent_mut-strong", "StrongW_Mutualism",
-                             if_else(combination == "ant-absent_mut-weak", "StrongW_Mutualism",
-                             if_else(combination == "ant-strong_mut-absent", "StrongW_Antagonism", 
-                             if_else(combination == "ant-strong_mut-strong", "Mutualism_Antagonism",
-                             if_else(combination == "ant-strong_mut-weak", "StrongW_Antagonism",
-                             if_else(combination == "ant-weak_mut-absent", "StrongW_Antagonism", 
-                             if_else(combination == "ant-weak_mut-strong", "StrongW_Mutualism",
-                             if_else( combination == "ant-weak_mut-weak", "Mutualism_Antagonism", "ERROR" )))))))))) 
