@@ -107,6 +107,23 @@ summary(m1)
 ```{r Efficiency}
 fenol_eff<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
 
+
+#Multiplying by the probability of recruitment
+rabbit_weight=0.286
+rat_weight=0.286
+fox_weight=0.179
+badger_weight=0.179
+deer_weight=0.0115
+wildb_weight=0
+
+fenol_eff <-mutate(fenol_eff,
+    #Resize effects
+    rabbit = rabbit * rabbit_weight,
+    rat = rat * rat_weight,
+    fox = fox * fox_weight,
+    badger = badger * badger_weight,
+    wildb= wildb * wildb_weight)
+
 #Matrix only with animals interaction
 fe<-subset(fenol_eff[2:7])
 
@@ -144,7 +161,6 @@ fe_glmm2<-lmer(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+
 fe_glmm2
 summary(fe_glmm2)
 anova(fe_glmm2, test="Chisq")
-Anova(fe_glmm2, type="III")
 
 fe_glmm3<-glm(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = fenol_eff)
 fe_glmm3

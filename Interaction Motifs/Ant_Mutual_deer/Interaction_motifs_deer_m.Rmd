@@ -21,7 +21,7 @@ matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networ
 
 #Wthout "plant" and "unknown" column
 matrix_effects_resized<-matrix_effects_resized[,-1]
-matrix_effects_resized<-matrix_effects_resized[,-8]
+matrix_effects_resized<-matrix_effects_resized[,-7]
 ```
 
 
@@ -61,7 +61,7 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
     #Compute ant and mut effects
     ant = deer_a + wildb,
     mut = (rabbit + rat ) + 
-          (fox    + badger + deer_m ),
+          (fox    + badger),
     class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
     class_mut = if_else( mut == 0, "absent", if_else( mut < median, "weak", if_else( mut >= median, "strong", "ERROR" ))),
     combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
@@ -70,9 +70,9 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
                              if_else(combination == "ant-absent_mut-weak", "Mutualist",
                              if_else(combination == "ant-strong_mut-absent", "Antagonist", 
                              if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
-                             if_else(combination == "ant-strong_mut-weak", "Antagonist",
+                             if_else(combination == "ant-strong_mut-weak", "Antagonist-MW",
                              if_else(combination == "ant-weak_mut-absent", "Antagonist", 
-                             if_else(combination == "ant-weak_mut-strong", "Mutualist",
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist-AW",
                              if_else( combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR" )))))))))) %>% 
     group_by(Motif) %>%
     summarise(count = n(),
@@ -81,12 +81,14 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
 
   return( counts )
 }
+
+
 ```
 
 
 We generated a matrix for linear discriminant analysis
 ```{r Matrix for LDA}
-write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_colapsed5.csv")
+write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_colapsed6.csv")
 ```
 
 
@@ -142,7 +144,8 @@ bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combin
 bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
 
 #Both populations
-marti_matas_im<-marti_matas_im[,-4] #eliminate iteration column
+marti_matas_im<-marti_matas_im[,-4] #eliminate freq column
+marti_matas_im<-marti_matas_im[,-1]
 bs_marti_matas<-select (marti_matas_im, Motif, count, iteration) %>% spread(.,key=Motif, value=count, fill=0)
 
 write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_marti_matas3.csv")

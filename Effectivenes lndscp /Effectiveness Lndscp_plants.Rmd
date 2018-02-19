@@ -208,36 +208,54 @@ matas<-im_glm[im_glm$pop == 'Matasgordas',]
 mrt_total["pop"]<-NA
 mrt_total$pop<-marti$pop
 mrt_total["motif"]<-NA
-mrt_total$motif<-marti$combination
+mrt_total$motif<-marti$motif
+mrt_total["combination"]<-NA
+mrt_total$combination<-marti$combination
+
 
 mtsg_total["pop"]<-NA
 mtsg_total$pop<-matas$pop
 mtsg_total["motif"]<-NA
-mtsg_total$motif<-matas$combination
+mtsg_total$motif<-matas$motif
+mtsg_total["combination"]<-NA
+mtsg_total$combination<-matas$combination
 
 
 mm_total["pop"]<-NA
 mm_total$pop<-mart_matas_visits$pop
 mm_total["motif"]<-NA
-mm_total$motif<-im_glm$combination
+mm_total$motif<-im_glm$motif
+mm_total["combination"]<-NA
+mm_total$combination<-im_glm$combination
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=20,
+mart_motif<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=5, nlines=20,
+                       myxlab= "Mean visits/day",
+                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.15,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+
+
+mart_comb<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$combination,pts.size=5, nlines=20,
                        myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.8))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
+matas_motif<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.8,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$pop, pts.size=3, nlines=9,
+matas_comb<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$combination,pts.size=3, nlines=16,
+                       myxlab= "Visit/day",
+                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.8,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+
+
+
+total_motif<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=5, pts.shape = mm_total$pop, nlines=20,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")
 
 
-p4<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=3, nlines=20,
+total_comb<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$combination, pts.size=3, nlines=20,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")
 
