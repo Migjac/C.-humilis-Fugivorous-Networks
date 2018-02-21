@@ -40,10 +40,12 @@ Opening a matrix file with weighted visits of frugivores in individual plants, t
 
 ```{r opening visits matrix}
 #Martinazo
-mart<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+
+
 ```
 &nbsp;
 
@@ -224,8 +226,8 @@ write.table(clos_mart, "/Users/apple/Desktop/Palmito/Postdoc-Interaction Network
 
 ```{r Network of both populations,echo=F}
 par(mfrow=c(1,1))
-mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits.csv",header=TRUE,check.names=FALSE,row.names=1)
-plotweb(mart_matas_visits, col.low=c(gray(seq(0.1,1,length=63))),col.high=c("white","white","gray30","gray30","black","black","darkgray"),method="normal", text.rot=90,low.lablength=10, high.lablength=8)
+mart_matas_visit<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+plotweb(mart_matas_visit, col.low=c(gray(seq(0.1,1,length=63))),col.high=c("white","white","gray30","gray30","black","black","darkgray"),method="normal", text.rot=90,low.lablength=10, high.lablength=8)
 ```
 &nbsp;
 
