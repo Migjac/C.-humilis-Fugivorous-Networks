@@ -17,16 +17,16 @@ library(devtools)
 
 Opening a matrix file with weighted visits of frugivores in individual plants, the "row.names=1" is necessary to run the model and to detect the "name of plants" in the matrix. 
 *Note: visit frequency= animal-visit-days/total-survey days.*
+
 ```{r opening visits matrix}
 #Martinazo
-mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
-
+matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both populations
-mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits_pop.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 ```
 
 ```{r Transform visits matrix}
@@ -85,11 +85,11 @@ mm_visits_long <- add_rownames(mm_visits_long, "plant")
 ```
 
 
+
 ```{r Recruitment probability}
 
 #Multiplying by the probability of recruitment
 rabbit_weight=0.286
-rat_weight=0.286
 fox_weight=0.179
 badger_weight=0.179
 deer_weight=0.0115
@@ -138,22 +138,19 @@ mtsg_fruits <-mutate(mtsg_fruits,
     deer = deer * deer_weight,
     wildboar= wildboar * wildb_weight)
 
-
-mm_fruits <-mutate(mm_fruits,
+m,_fruits <-mutate(mm_fruits,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
     rat = rat * rat_weight,
     fox = fox * fox_weight,
     badger = badger * badger_weight,
     deer = deer * deer_weight,
-    wildb= wildb * wildb_weight)
-
+    wildboar= wildboar * wildb_weight)
 
 #convert data.frame to matrix
 mrt_fruits<-data.matrix(mrt_fruits)
 mtsg_fruits<-data.matrix(mtsg_fruits)
 mm_fruits<-data.matrix(mm_fruits)
-
 
 
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
@@ -208,55 +205,36 @@ matas<-im_glm[im_glm$pop == 'Matasgordas',]
 mrt_total["pop"]<-NA
 mrt_total$pop<-marti$pop
 mrt_total["motif"]<-NA
-mrt_total$motif<-marti$motif
-mrt_total["combination"]<-NA
-mrt_total$combination<-marti$combination
-
+mrt_total$motif<-marti$combination
 
 mtsg_total["pop"]<-NA
 mtsg_total$pop<-matas$pop
 mtsg_total["motif"]<-NA
-mtsg_total$motif<-matas$motif
-mtsg_total["combination"]<-NA
-mtsg_total$combination<-matas$combination
+mtsg_total$motif<-matas$combination
 
 
 mm_total["pop"]<-NA
 mm_total$pop<-mart_matas_visits$pop
 mm_total["motif"]<-NA
-mm_total$motif<-im_glm$motif
-mm_total["combination"]<-NA
-mm_total$combination<-im_glm$combination
+mm_total$motif<-im_glm$combination
 
 #Effectiveness plot per plant
-mart_motif<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=5, nlines=20,
-                       myxlab= "Mean visits/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.15,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
-
-
-mart_comb<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$combination,pts.size=5, nlines=20,
+p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=20,
                        myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.8))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-matas_motif<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
+p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.8,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-matas_comb<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$combination,pts.size=3, nlines=16,
-                       myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.8,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
-
-
-
-total_motif<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=5, pts.shape = mm_total$pop, nlines=20,
+p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$pop, pts.size=3, nlines=9,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")
 
 
-total_comb<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$combination, pts.size=3, nlines=20,
+p4<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=3, nlines=20,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")
-
 ```
