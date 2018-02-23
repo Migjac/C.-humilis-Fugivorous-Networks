@@ -53,10 +53,10 @@ Opening a matrix file with weighted links with frugivores fruit removal in indiv
 
 ```{r}
 #Martinazo
-mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 ```
 
 &nbsp;
@@ -217,7 +217,7 @@ LLspplvlmatas$`lower level`[,c(2,3,7,10,17)]
 
 ```{r Network of both populations,echo=F}
 par(mfrow=c(1,1))
-mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 plotweb(mart_matas_fruits, col.low=c(gray(seq(0.1,1,length=63))),col.high=c("white","white","gray30","gray30","black","black","darkgray"),method="normal", text.rot=90,low.lablength=10, high.lablength=8)
 ```
 &nbsp;
