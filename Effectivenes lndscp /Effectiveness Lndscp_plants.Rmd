@@ -20,13 +20,13 @@ Opening a matrix file with weighted visits of frugivores in individual plants, t
 
 ```{r opening visits matrix}
 #Martinazo
-mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both populations
-mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits_pop.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Without column pop
 
