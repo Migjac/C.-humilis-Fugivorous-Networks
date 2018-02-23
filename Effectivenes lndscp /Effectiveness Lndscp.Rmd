@@ -20,13 +20,13 @@ Opening a matrix file with weighted visits of frugivores in individual plants, t
 
 ```{r opening visits matrix}
 #Martinazo
-mart<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both populations
-mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_matas_visits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
 
@@ -237,7 +237,7 @@ mart_elong<-mutate(mart_elong,
 
 #naming the recruit column
 mart_elong<-mutate(mart_elong,
-     recruit = if_else( animal == "deer","0.01115", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(mart_elong$recruit)
 mart_elong<-cbind(mart_elong[,-4],recruit)
@@ -251,7 +251,7 @@ matas_elong<-mutate(matas_elong,
 
 #naming the recruit column
 matas_elong<-mutate(matas_elong,
-     recruit = if_else( animal == "deer","0.01115", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
