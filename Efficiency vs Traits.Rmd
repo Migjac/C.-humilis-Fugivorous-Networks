@@ -105,8 +105,7 @@ summary(m1)
 
 
 ```{r Efficiency}
-fenol_eff<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda.csv")
-
+mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
 
 #Multiplying by the probability of recruitment
 rabbit_weight=0.286
@@ -115,17 +114,19 @@ fox_weight=0.179
 badger_weight=0.179
 deer_weight=0.0115
 wildb_weight=0
+deer_weight=0.0112
 
-fenol_eff <-mutate(fenol_eff,
+mart_matas_e <-mutate(mart_matas_e,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
     rat = rat * rat_weight,
     fox = fox * fox_weight,
     badger = badger * badger_weight,
-    wildb= wildb * wildb_weight)
+    wildboar= wildboar * wildb_weight,
+    deer=deer*deer_weight)
 
-#Matrix only with animals interaction
-fe<-subset(fenol_eff[2:7])
+#subset only animal interactions
+fe<-subset(mart_matas_e[2:7])
 
 #convert data.frame to matrix
 fe<-data.matrix(fe)
@@ -143,29 +144,56 @@ colnames(fe_long_sum) <- "sum_eff"
 
 
 #Adding new columns of visits summaries 
-fenol_eff["mean_eff"]<-NA
-fenol_eff$mean_eff<-fe_long$mean_eff
+mart_matas_e["mean_eff"]<-NA
+mart_matas_e$mean_eff<-fe_long$mean_eff
 
-fenol_eff["sum_eff"]<-NA
-fenol_eff$sum_eff<-fe_long_sum$sum_eff
+mart_matas_e["sum_eff"]<-NA
+mart_matas_e$sum_eff<-fe_long_sum$sum_eff
 
-
+mart_matas_e<-mart_matas_e[-c(67,61),]
 
 #GLMM visits
-fe_glmm<-glm(mean_eff~inf_s+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = fenol_eff)
+fe_glmm<-glm(mean_eff~inf_s+motif+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
 fe_glmm
 summary(fe_glmm)
 anova(fe_glmm, test="Chisq")
+lsmeans(fe_glmm,"motif",transform="response")
+plot(fe_glmm)
 
-fe_glmm2<-lmer(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = fenol_eff)
+fe_glmm2<-lmer(sum_eff~inf_s+motif+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = mart_matas_e)
 fe_glmm2
 summary(fe_glmm2)
 anova(fe_glmm2, test="Chisq")
+lsmeans(fe_glmm2,"motif",transform="response")
 
-fe_glmm3<-glm(sum_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = fenol_eff)
+fe_glmm3<-glm(sum_eff~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = mart_matas_e)
 fe_glmm3
 summary(fe_glmm3)
 anova(fe_glmm3, test="Chisq")
-Anova(fe_glmm3, type="III")
+anova(fe_glmm3, type="III")
+lsmeans(fe_glmm3,"motif",transform="response")
+
+
+f_glmm<-glm(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens,data = mart_matas_e)
+f_glmm
+summary(f_glmm)
+anova(f_glmm, test="Chisq")
+lsmeans(f_glmm,"motif",transform="response")
+plot(f_glmm)
+
+
+f_glmm1<-standardize(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens,data = mart_matas_e)
+f_glmm1
+f_glmm1$call
+f_glmm1$scale
+f_glmm1$family
+f_glmm1$data
+f_glmm1$contrasts
+f_glmm1$groups
+stnd_fe<-f_glmm1$data
+
+write.csv(stnd_fe,"/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/stnd_var.csv")
+
+
 
 ```
