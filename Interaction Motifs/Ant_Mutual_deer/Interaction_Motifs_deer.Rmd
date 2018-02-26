@@ -59,7 +59,7 @@ We created a function for the iteration results given the median. Every value be
 compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   counts <- mutate( my_matrix,
     #Compute ant and mut effects
-    ant = deer_a + wildb,
+    ant = deer + wildboar,
     mut = (rabbit + rat ) + 
           (fox    + badger),
     class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
@@ -82,13 +82,40 @@ compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
   return( counts )
 }
 
+#With six interaction motifs
+compute_per_category_count <- function(my_matrix, iteration, median, n_row) {
+  counts <- mutate( my_matrix,
+    #Compute ant and mut effects
+    ant = deer + wildboar,
+    mut = (rabbit + rat ) + 
+          (fox    + badger),
+    class_ant = if_else( ant == 0, "absent", if_else( ant < median, "weak", if_else( ant >= median, "strong", "ERROR" ))),
+    class_mut = if_else( mut == 0, "absent", if_else( mut < median, "weak", if_else( mut >= median, "strong", "ERROR" ))),
+    combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
+    mutate(.,motif = if_else( combination == "ant-absent_mut-absent","No_Interaction",
+                             if_else(combination == "ant-absent_mut-strong", "Mutualist",
+                             if_else(combination == "ant-absent_mut-weak", "Mutualist",
+                             if_else(combination == "ant-strong_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-strong_mut-weak", "Antagonist-MW",
+                             if_else(combination == "ant-weak_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist-AW",
+                             if_else( combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR" )))))))))) %>% 
+    group_by(motif) %>%
+    summarise(count = n(),
+              freq  = count/n_row) %>%
+    mutate(iteration = iteration) 
 
+  return( counts )
+}
 ```
 
 
 We generated a matrix for linear discriminant analysis
 ```{r Matrix for LDA}
-write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_colapsed6.csv")
+write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_4.csv")
+
+write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_6.csv")
 ```
 
 
@@ -182,35 +209,35 @@ c(-z.half.alpha, z.half.alpha)
 #[1] -1.959964  1.959964
 
 #No interaction
-z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #0.7411706
+z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #1.241986
 # Lower 1−tailed test:
-pnorm(z.abs, lower.tail=T) #p-value: 0.7770689
+pnorm(z.abs, lower.tail=T) #p-value: 0.8928792
 # Upper 1−tailed test:
-pnorm(z.abs, lower.tail=F) #p−value: 0.2229311
+pnorm(z.abs, lower.tail=F) #p−value: 0.1071208
 #Random pattern
 
 #MUTUALISM_ANTAGONISM
-z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-0.525858
+z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-1.883184
 # Lower 1−tailed test:
-pnorm(z.mu_ant, lower.tail=T) #p-value: 0.05688707
+pnorm(z.mu_ant, lower.tail=T) #p-value: 0.02983775
 # Upper 1−tailed test:
-pnorm(z.mu_ant, lower.tail=F) #p−value: 0.9431129
-#Random pattern
+pnorm(z.mu_ant, lower.tail=F) #p−value: 0.9701623
+#less than expected
 
 #MUTUALIST
-z.mut <- (bs_obs$Mutualist - mean(bs2$Mutualist))/sd(bs2$Mutualist) #0.1398777
+z.mut <- (bs_obs$Mutualist - mean(bs2$Mutualist))/sd(bs2$Mutualist) #-0.1496855
 # Lower 1−tailed test:
-pnorm(z.mut, lower.tail=T) #p-value: 0.5556217
+pnorm(z.mut, lower.tail=T) #p-value: 0.4405064
 # Upper 1−tailed test:
-pnorm(z.mut, lower.tail=F) #p−value: 0.4443783
+pnorm(z.mut, lower.tail=F) #p−value: 0.5594936
 #Less than expected
 
 #ANTAGONIST
 z.ant <- (bs_obs$Antagonist - mean(bs2$Antagonist))/sd(bs2$Antagonist) #0.741204
 # Lower 1−tailed test:
-pnorm(z.ant, lower.tail=T) #p-value: 0.7707151
+pnorm(z.ant, lower.tail=T) #p-value: 0.9363506
 # Upper 1−tailed test:
-pnorm(z.ant, lower.tail=F) #p−value: 0.2292849
+pnorm(z.ant, lower.tail=F) #p−value: 0.1745464
 #Less than expected
 
 #Antagonist-MW
@@ -270,7 +297,7 @@ four_motifs<-ggplot(total,aes(x=variable,y=value, fill=Data))+
        geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
                 width=0.2,   position=position_dodge(0.9))+
                 scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-Antagonist","Antagonist"))+ 
-                annotate(geom="text", x=1, y=19, label="N.S.")+annotate(geom="text", x=2, y=22, label="N.S.")+annotate(geom="text", x=3, y=24, label="p=0.057") +annotate(geom="text", x=4, y=21, label="p=0.078")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                annotate(geom="text", x=1, y=17, label="p=0.107")+annotate(geom="text", x=2, y=21, label="N.S.")+annotate(geom="text", x=3, y=28, label="p=0.0298") +annotate(geom="text", x=4, y=21, label="p=0.175")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
                 theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
                 theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
                 
@@ -298,7 +325,7 @@ im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fu
 im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda_6.csv")
 
 #selecting only the explanatory variables
-im_lda<-subset(im_glm[11:22])        
+im_lda<-subset(im_glm[13:22])        
 
 #Correlation matriz for explanatory variables
 cor(im_lda[2:9])
