@@ -82,13 +82,13 @@ Opening a matrix file with weighted links with frugivores fruit removal in indiv
 
 ```{r}
 #Martinazo
-mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both poulations
-mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_fruits<-read.csvread.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
 #Without column unknown
@@ -199,10 +199,10 @@ p2+ ggtitle("Martasgordas's dwarf palm frugivorous")
 
 ```{r, Effectiveness and seedling survival}
 #Martinazo
-mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Wihout unknown
 mart_e<-subset(mart_e[,-7])
@@ -268,7 +268,7 @@ matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$rec
 
 ```{r}
 ###Both populations
-mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/Dispersal-Networks/Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_e<-read.csvread.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Wihout unknown
 mm_e<-subset(mart_matas_fruits[,-7])
