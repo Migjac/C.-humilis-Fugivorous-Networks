@@ -233,7 +233,7 @@ mart_elong <- add_rownames(mart_elong, "animal")
 
 #naming the i_group column
 mart_elong<-mutate(mart_elong,
-     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wild", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 
 #naming the recruit column
 mart_elong<-mutate(mart_elong,
@@ -247,11 +247,11 @@ matas_elong <- add_rownames(matas_elong, "animal")
 
 #naming the i_group column
 matas_elong<-mutate(matas_elong,
-     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildboar", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 
 #naming the recruit column
 matas_elong<-mutate(matas_elong,
-     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildboar","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
@@ -268,7 +268,7 @@ matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$rec
 
 ```{r}
 ###Both populations
-mart_matas_e<-read.csvread.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Wihout unknown
 mm_e<-subset(mart_matas_fruits[,-7])
@@ -292,5 +292,5 @@ p3<-effectiveness_plot(q1=mm_e_long$Effectiveness,q2=mm_e_long$recruit, pts.colo
                        myxlab= "Handled fruits/Visit",
                        myylab="Plant recruitment")
                       
-
+```
 

@@ -158,6 +158,7 @@ fe_glmm
 summary(fe_glmm)
 anova(fe_glmm, test="Chisq")
 lsmeans(fe_glmm,"motif",transform="response")
+summary(glht(fe_glmm, mcp(motif="Tukey")))
 plot(fe_glmm)
 
 fe_glmm2<-lmer(sum_eff~inf_s+motif+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = mart_matas_e)
@@ -165,6 +166,8 @@ fe_glmm2
 summary(fe_glmm2)
 anova(fe_glmm2, test="Chisq")
 lsmeans(fe_glmm2,"motif",transform="response")
+summary(glht(fe_glmm, mcp(motif="Tukey")))
+
 
 fe_glmm3<-glm(sum_eff~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+pop,data = mart_matas_e)
 fe_glmm3
