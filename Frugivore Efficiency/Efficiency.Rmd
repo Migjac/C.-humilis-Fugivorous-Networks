@@ -15,9 +15,11 @@ Opening a matrix file with weighted links with frugivores fruit remotion efficie
 ```{r}
 #Martinazo
 mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_e<-subset(mart_e[,-7])
 
 #Matasgordas
 matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_e<-subset(matas_e[,-7])
 ```
 
 netcarto(matas_e)
@@ -74,6 +76,8 @@ plotweb(matas_e, col.low=c(gray(seq(0.1,1,length=34))), col.high=c("white","whit
 ```{r Networklevel of Martinazo}
 #Martinazo
 networklevel(mart_e, index = c("connectance","web asymmetry","cluster coefficient","nestedness","weighted nestedness"))
+#connectance          web asymmetry    cluster coefficient             nestedness    weighted nestedness cluster.coefficient.HL cluster.coefficient.LL 
+#0.2986111             -0.6000000              0.2083333             16.7720200              0.7198332              0.7494328              0.4197839  
 ```
 
 #Nestedness significance
@@ -82,13 +86,15 @@ martnulls<-nullmodel(mart_e, N=10000, method = 3)
 martnull <- unlist(sapply(martnulls, networklevel, index="weighted nestedness"))
 marte <- unlist(networklevel(mart_e, index="weighted nestedness"))
 praw <- sum(martnull>marte) / length(martnull)
-    ifelse(praw > 0.5, 1-praw, praw)  #p=0.0146
+    ifelse(praw > 0.5, 1-praw, praw)  #p=0.0886
 ```
 
 
 ```{r Networklevel of Matasgordas}
 #Matasgordas
 networklevel(matas_e,index = c("connectance","web asymmetry","cluster coefficient","nestedness","weighted nestedness"))
+# connectance          web asymmetry    cluster coefficient             nestedness    weighted nestedness cluster.coefficient.HL cluster.coefficient.LL 
+#  0.3064516             -0.6756757              0.3225806             25.3886707              0.5594212              0.4941077              0.4015286
 ```
 
 ```{r Nestedness significance Matasgordas}
@@ -96,7 +102,7 @@ matasnulls<-nullmodel(matas_e, N=10000, method = 3)
 matasnull <- unlist(sapply(matasnulls, networklevel, index="connectance"))
 matase <- unlist(networklevel(matas_e, index="connectance"))
 praw <- sum(matasnull>matase) / length(matasnull)
-    ifelse(praw > 0.5, 1-praw, praw)  #p=0.33
+    ifelse(praw > 0.5, 1-praw, praw)  #p=0
 ```
 
 
@@ -111,10 +117,12 @@ mod_matas_e<-computeModules(matas_e)
 Martinazo
 ```{r Modularity value of Martinazo, echo=FALSE}
 mod_mart_e@likelihood
+#0.2698468
 ```
 Matasgordas
 ```{r Modularity value of Matasgordas, echo=FALSE}
 mod_matas_e@likelihood
+#0.4820031
 ```
 Modularity in Matasgordas bigger (0.5641114) than Martinazo (0.1928246)
 
@@ -123,7 +131,7 @@ Modularity in Matasgordas bigger (0.5641114) than Martinazo (0.1928246)
 #####Modularity significance analysis
 Batch to generate the null models for modularity M significance test.
 ```{r}
-mat<-mart_e
+mat<-matas_e
 res <- computeModules(mat)
 nulls <- nullmodel(mat, N=100, method=3)
 modules.nulls <- sapply(nulls, computeModules)
@@ -131,27 +139,27 @@ like.nulls <- sapply(modules.nulls, function(x) x@likelihood)
 z <- (res@likelihood - mean(like.nulls))/sd(like.nulls)
 p <- 2*pnorm(-abs(z))
 cat(p," ")
-
+N=100
 
 # Modularity for observed matrix.
 #Martinazo
-mod_mart<-0.1928246
+mod_mart<-0.2698468
 
 #Matasgordas
-mod_matas<-0.5641114
+mod_matas<-0.4820031
 
 
 
-Msig <- function (mat, mlike)  {
+Msig <- function (mat, mod_matas)  {
     require(bipartite)
     # mat is the input matrix for which M is tested
     # mlike is the observed mean M value
     nulls <- nullmodel(mat, N=100, method=3)
     modules.nulls <- sapply(nulls, computeModules)
     like.nulls <- sapply(modules.nulls, function(x) x@likelihood)
-    z <- (mlike - mean(like.nulls))/sd(like.nulls)
+    z <- (mod_matas - mean(like.nulls))/sd(like.nulls)
     p <- 2*pnorm(-abs(z))
-    cat("\n\n","P value for modularity M= ", mlike, "\n", 
+    cat("\n\n","P value for modularity M= ", mod_matas, "\n", 
         "No. resamplings= ", N, "\n",
         "P=  ",p)
 } 
@@ -159,9 +167,9 @@ Msig <- function (mat, mlike)  {
 
 # Give here the mean observed modularity values.
 #Martinazo
-Msig(mart_e, mod_mart) # P=   4.88301e-28
+Msig(mart_e, mod_mart) # P=   2.406504e-09
 #Matasgordas
-Msig(matas_e, mod_matas) #P=   1.212893e-67
+Msig(matas_e, mod_matas) #P=   1.375774e-29
 
 
 ```
@@ -229,7 +237,9 @@ spp_lev_mart<-specieslevel(matas_e)
 HLspplvlmart<-specieslevel(mart_e)
 HLspplvlmart$`higher level`[,c(2,3,8,10)]
 LLspplvlmart<-specieslevel(mart_e)
-LLspplvlmart$`lower level`[,c(2,3,7,10,17)]
+marti_spplv<-LLspplvlmart$`lower level`[,c(2,3,7,10,17)]
+
+write.csv(marti_spplv, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_spplvl.csv")
 ```
 &nbsp;
 
@@ -238,7 +248,10 @@ LLspplvlmart$`lower level`[,c(2,3,7,10,17)]
 spplvlmatas<-specieslevel(matas_e)
 spplvlmatas$`higher level`[,c(2,3,8,10)]
 LLspplvlmatas<-specieslevel(matas_e)
-LLspplvlmatas$`lower level`[,c(2,3,7,10,17)]
+matas_spplv<-LLspplvlmatas$`lower level`[,c(2,3,7,10,17)]
+
+write.csv(matas_spplv, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/matas_spplvl.csv")
+
 ```
 
 

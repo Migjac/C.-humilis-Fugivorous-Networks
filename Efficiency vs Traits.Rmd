@@ -153,15 +153,15 @@ mart_matas_e$sum_eff<-fe_long_sum$sum_eff
 
 #####GLMM efficiency*recruitment####
 
-#Mean recruitment by standardized traits
-fe_glm<-glm(mean_eff~inf_s+norm_d+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
+#Mean recruitment by standardized traits and normalized degree
+fe_glm<-glm(mean_eff~inf_s+norm_d+spp_str+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
 fe_glm
 summary(fe_glm)
 anova(fe_glm, test="Chisq")
 lsmeans(fe_glm,"motif",transform="response")
 summary(glht(fe_glm, mcp(motif="Tukey")))
 
-#Mean recruitment by motif and standardized traits
+#Mean recruitment by motif and standardized traits and normalized degree
 fe_glm1<-glm(mean_eff~inf_s+motif+norm_d+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
 fe_glm1
 summary(fe_glm1)
@@ -170,14 +170,15 @@ lsmeans(fe_glm1,"motif",transform="response")
 summary(glht(fe_glm1, mcp(motif="Tukey")))
 
 #Mean recruitment and standardized traits with population as random
-fe_glmm2<-lmer(mean_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = mart_matas_e)
+library(nlme)
+fe_glmm2<-lme(mean_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s, random=~1| pop,data = mart_matas_e)
 fe_glmm2
 summary(fe_glmm2)
 anova(fe_glmm2, test="Chisq")
 lsmeans(fe_glmm2,"motif",transform="response")
 
 #Mean recruitment by motif and standardized traits with population as random
-fe_glmm3<-lmer(mean_eff~inf_s+motif+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+(1 | pop),data = mart_matas_e)
+fe_glmm3<-lme(mean_eff~inf_s+motif+norm_d+spp_str+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s, random=~1| pop,data = mart_matas_e)
 fe_glmm3
 summary(fe_glmm3)
 anova(fe_glmm3, test="Chisq")
@@ -189,14 +190,14 @@ summary(glht(fe_glmm3, mcp(motif="Tukey")))
 
 #GLMM with network indexes
 
-net_glmm1<-glm(norm_d~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
+net_glmm1<-lme(norm_d~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,random=~1| pop, data = mart_matas_e)
 net_glmm1
 summary(net_glmm1)
 anova(net_glmm1, test="Chisq")
 anova(net_glmm1, type="III")
 lsmeans(net_glmm1,"motif",transform="response")
 
-net_glmm2<-glm(spp_str~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
+net_glmm2<-lme(spp_str~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,random=~1| pop,data = mart_matas_e)
 net_glmm2
 summary(net_glmm2)
 anova(net_glmm2, test="Chisq")
@@ -204,7 +205,7 @@ anova(net_glmm2, type="III")
 lsmeans(net_glmm2,"motif",transform="response")
 
 #With motifs
-net_glmm3<-glm(norm_d~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
+net_glmm3<-lme(norm_d~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,random=~1| pop,data = mart_matas_e)
 net_glmm3
 summary(net_glmm3)
 anova(net_glmm3, test="Chisq")
@@ -213,7 +214,7 @@ lsmeans(net_glmm3,"motif",transform="response")
 summary(glht(net_glmm3, mcp(motif="Tukey")))
 
 
-net_glmm4<-glm(spp_str~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
+net_glmm4<-lme(spp_str~inf_s+size_s+motif+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,random=~1| pop,data = mart_matas_e)
 net_glmm4
 summary(net_glmm4)
 anova(net_glmm4, test="Chisq")
