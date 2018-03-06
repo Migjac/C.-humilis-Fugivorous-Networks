@@ -12,6 +12,7 @@ library(reshape2)
 library(tidyr)
 library(ggplot2)
 library(devtools)
+library(effect.lndscp)
 ```
 
 
@@ -96,6 +97,11 @@ badger_weight=0.179
 deer_weight=0.012
 wildb_weight=0
 
+rb_sd=0.01
+rt_sd=0.01
+f_sd=0.04
+b_sd=0.04
+d_sd=0.001
 ```
 
 
@@ -190,6 +196,7 @@ mtsg_fruits_long<-mtsg_fruits_long[,-1]
 mm_fruits_long <- add_rownames(mm_fruits_long, "plant")
 mm_fruits_long<-mm_fruits_long[,-1]
 
+weights_sd<-c(0.001,0,0.01,0.01,0.04,0.04)
 
 #Join coulumns
 mrt_total<-cbind(mrt_visits_long,mrt_fruits_long)
@@ -232,12 +239,12 @@ p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_
                        myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, label=matas$plant, nlines=16,
+p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 
-p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$pop, pts.size=3, nlines=9,
+p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean,q2.error=weights_sd, pts.color=mm_total$pop, pts.size=3, nlines=9,
                        myxlab= "Visit/day",
                        myylab="Fruit removal*Recruitment")
 

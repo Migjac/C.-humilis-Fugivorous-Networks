@@ -32,6 +32,7 @@ rat_weight=0.286
 fox_weight=0.179
 badger_weight=0.179
 
+
 ```
 
 
@@ -73,7 +74,7 @@ compute_per_category_count <- function(my_matrix, iteration, median1, n_row) {
                              if_else(combination == "ant-strong_mut-weak", "Mutualist-Antagonist",
                              if_else(combination == "ant-weak_mut-absent", "Antagonist", 
                              if_else(combination == "ant-weak_mut-strong", "Mutualist-Antagonist",
-                             if_else( combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR" )))))))))) %>% 
+                             if_else(combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR")))))))))) %>% 
     group_by(motif) %>%
     summarise(count = n(),
               freq  = count/n_row) %>%
@@ -332,6 +333,7 @@ cor(im_lda[2:9])
 
 
 #Discriminant analysis
+library(MASS)
 im.lda<-lda(im_lda$motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+sincr_s, data=im_lda)
 im.lda
 im_p<-predict(im.lda)
