@@ -19,9 +19,20 @@ Charging matrix of effectiveness of two populations (visit/day*fruits/day)
 ```{r Matrix of effectiveness}
 matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/mart_matas_eff.csv")
 
+
+
 #Wthout "plant" and "unknown" column
 matrix_effects_resized<-matrix_effects_resized[,-1]
 matrix_effects_resized<-matrix_effects_resized[,-7]
+
+
+#Martinazo
+matrix_effects_resized<-subset(matrix_effects_resized[47:70,])
+
+#Matasgordas
+matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/matas_eff.csv", dec=".")
+
+
 ```
 
 
@@ -45,17 +56,87 @@ matrix_effects_resized <-mutate(matrix_effects_resized,
     fox = fox * fox_weight,
     badger = badger * badger_weight)
 
-matrix_effects_resized_NA <- matrix_effects_resized
-matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
-median1 <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
-n_row <- nrow(matrix_effects_resized)
+#matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
+#matrix_effects_resized_NA <- matrix_effects_resized
+#median1 <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
 
+n_row <- nrow(matrix_effects_resized)
 my_matrix<-matrix_effects_resized
+
+#counts<-subset(counts[,7:8])
+#matrix_effects_resized<-counts
+#matrix_effects_resized_NA <- matrix_effects_resized
+#matrix_effects_resized_NA[matrix_effects_resized_NA==0]<-NA
+#median1 <- median(as.matrix(matrix_effects_resized_NA), na.rm=TRUE)
+
+#my_matrix<-matrix_effects_resized
+
+median1<-0.0618
+median_mart<-0.3556214
+median_matas<-0.04359917
 ```
 
 
 We created a function for the iteration results given the median. Every value beneath the median will be considered as weak, values ≥ median as strong and 0 values as no interaction. The results are a column with the triads of mutualistic and antagonistic interactions based on the interaction strength median and the frequency of the interaction motifs. The antagonistic interactions are composed by wildboar and deer; and mutualistic by rabbit, rat, badger and fox (and a fraction of the deers). Because we have a poor pool of plants, we redesigned  the 9 motifs to 4.*Notice, that a small % of the seeds ingested by deers could escaped the predation process via spitting Castañeda et al. 2017). We divide the interaction of the deers in two: antagonistic deers (deer_a) and mutualistic deers (deer_m). The values of the mutualistic deer represent
 ```{r Function to obtain Interaction Motifs}
+#Martinazo
+compute_per_category_count <- function(my_matrix, iteration, median_mart, n_row) {
+  counts <- mutate( my_matrix,
+    #Compute ant and mut effects
+    ant = deer + wildboar,
+    mut = (rabbit + rat ) + 
+          (fox    + badger),
+    class_ant = if_else( ant == 0, "absent", if_else( ant < median_mart, "weak", if_else( ant >= median_mart, "strong", "ERROR" ))),
+    class_mut = if_else( mut == 0, "absent", if_else( mut < median_mart, "weak", if_else( mut >= median_mart, "strong", "ERROR" ))),
+    combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
+    mutate(.,motif = if_else( combination == "ant-absent_mut-absent","No_Interaction",
+                             if_else(combination == "ant-absent_mut-strong", "Mutualist",
+                             if_else(combination == "ant-absent_mut-weak", "Mutualist",
+                             if_else(combination == "ant-strong_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-strong_mut-weak", "Mutualist-Antagonist",
+                             if_else(combination == "ant-weak_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR")))))))))) %>% 
+    group_by(motif) %>%
+    summarise(count = n(),
+              freq  = count/n_row) %>%
+    mutate(iteration = iteration) 
+
+  return( counts )
+}
+
+
+#Matasgordas
+
+compute_per_category_count <- function(my_matrix, iteration, median_matas, n_row) {
+  counts <- mutate( my_matrix,
+    #Compute ant and mut effects
+    ant = deer + wildboar,
+    mut = (rabbit + rat ) + 
+          (fox    + badger),
+    class_ant = if_else( ant == 0, "absent", if_else( ant < median_matas, "weak", if_else( ant >= median_matas, "strong", "ERROR" ))),
+    class_mut = if_else( mut == 0, "absent", if_else( mut < median_matas, "weak", if_else( mut >= median_matas, "strong", "ERROR" ))),
+    combination = paste0( "ant-", class_ant, "_mut-" ,class_mut)) %>%
+    mutate(.,motif = if_else( combination == "ant-absent_mut-absent","No_Interaction",
+                             if_else(combination == "ant-absent_mut-strong", "Mutualist",
+                             if_else(combination == "ant-absent_mut-weak", "Mutualist",
+                             if_else(combination == "ant-strong_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-strong_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-strong_mut-weak", "Mutualist-Antagonist",
+                             if_else(combination == "ant-weak_mut-absent", "Antagonist", 
+                             if_else(combination == "ant-weak_mut-strong", "Mutualist-Antagonist",
+                             if_else(combination == "ant-weak_mut-weak", "Mutualist-Antagonist", "ERROR")))))))))) %>% 
+    group_by(motif) %>%
+    summarise(count = n(),
+              freq  = count/n_row) %>%
+    mutate(iteration = iteration) 
+
+  return( counts )
+}
+
+
+#Both populations
 
 compute_per_category_count <- function(my_matrix, iteration, median1, n_row) {
   counts <- mutate( my_matrix,
@@ -122,6 +203,24 @@ write.csv(counts, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-
 
 We randomized the frequency of apperance of every motif to analyzed the probability of each motif in oour interaction. Thus, we resampled 10,000 times with the frequency of each typology based on the created function
 ```{r Randomized frequencies}
+#Martinazo
+boostrap_df_mart <- compute_per_category_count (matrix_effects_resized, "real_data", median_mart, n_row)
+#Loop to generate the distribution
+for (iteration in seq (1,10000) )
+{
+counts <- compute_per_category_count (as.data.frame(apply(matrix_effects_resized ,2,sample)), iteration, median_mart, n_row)
+boostrap_df_mart <- rbind(counts, boostrap_df_mart)
+}
+
+#Matasgordas
+boostrap_df_matas <- compute_per_category_count (matrix_effects_resized, "real_data", median_matas, n_row)
+#Loop to generate the distribution
+for (iteration in seq (1,10000) )
+{
+counts <- compute_per_category_count (as.data.frame(apply(matrix_effects_resized ,2,sample)), iteration, median_matas, n_row)
+boostrap_df_matas <- rbind(counts, boostrap_df_matas)
+}
+
 #Define boostrap_df. We obtained the number of plants in eahc typology
 boostrap_df <- compute_per_category_count (matrix_effects_resized, "real_data", median1, n_row)
 #Loop to generate the distribution
@@ -134,7 +233,7 @@ boostrap_df <- rbind(counts, boostrap_df)
 ```
 
 
-*We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas, perhaps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.*
+#*We found that the values differ between the two populations. In general there is a decrease in the interaction strength between plants and animals. There is more pressure over fruits in Martinazo with a higher median valuethan in Matasgordas, perhaps beause is a smaller population where the resources are limited. Also, there are less plants with fleshy fruits.*
 ```{r}
 write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/bs_mart_matas_mut_deer.csv")
 ```
@@ -143,21 +242,37 @@ write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Network
 Boxplot for the frequencies of interaction typologies for both populations
 ```{r Boxplots interaction typologies frequency}
 #Martinazo
-mart_im<-read.csv("boostrap_mart.csv")
+mart_im<-boostrap_df_mart
 
-boxplot(mart_im$count~mart_im$combination,data=mart_im, main="interaction motifs", 
-  	xlab="Interaction motifs", ylab="frequency")
+bp_gg_mart4<-ggplot(mart_im, aes(x=motif, y=count))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "Frequency", breaks = seq(0, 19,2), limits=c(0, 19))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
 
 #Matasgordas
-matas_im<-read.csv("boostrap_matas.csv")
+matas_im<-boostrap_df_matas
 
-boxplot(matas_im$count~matas_im$combination,data=matas_im, main="interaction motifs", 
-  	xlab="Interaction motifs", ylab="frequency")
+bp_gg_matas4<-ggplot(matas_im, aes(x=motif, y=count))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "Frequency", breaks = seq(0, 28,2), limits=c(0, 28))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
 
 #Both Population
 marti_matas_im<-boostrap_df
 
 boxplot(marti_matas_im$count~marti_matas_im$motif,data=marti_matas_im, xlab="Interaction motifs", ylab="Frequency")
+
+
+bp_gg4<-ggplot(marti_matas_im, aes(x=motif, y=count))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "Frequency", breaks = seq(0, 35,5), limits=c(0, 35))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+
+bp_gg6<-ggplot(marti_matas_im, aes(x=motif, y=count))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-AW","Mutualist-Antagonist","Antagonist-MW","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "Frequency", breaks = seq(0, 28,4), limits=c(0, 28))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5)) 
+
+
 ```
 
 
@@ -166,10 +281,10 @@ Reorganizing the typologies into columns to analyze the significance of each typ
 ```{r Motifs as columns}
 
 #Martinazo
-bs_mart<-select (mart_im, combination, count, iteration) %>% spread(.,key=combination, value=count, fill=0)
+bs_mart<-select (mart_im, motif, count, iteration) %>% spread(.,key=motif, value=count, fill=0)
 
 #Matasgordas
-bs_matas<- select(matas_im, combination, count, iteration) %>% spread(.,key=combination, value=count, drop=TRUE)
+bs_matas<- select(matas_im, motif, count, iteration) %>% spread(.,key=motif, value=count, drop=TRUE)
 
 #Both populations
 bs_marti_matas<-select (marti_matas_im, motif, count, iteration) %>% spread(.,key=motif, value=count, fill=0)
@@ -182,9 +297,19 @@ write.csv(bs_marti_matas, "/Users/apple/desktop/Palmito/Postdoc-Interaction Netw
 Creating matrix of the observed and expected data
 ```{r Matrixs of radom data and observed}
 #"Excluding" the first row, that contain the "observed data" (row 10001)
+bs_mart_expected<-bs_mart[-c(10001), ]
+
+bs_mat_expected<-bs_matas[-c(10001), ]
+
 bs_mar_mat_expected<-bs_marti_matas[-c(10001), ]
 
 #Without column iteration
+bs2<-subset(bs_mart_expected[,-1])
+
+bs2<-subset(bs_mat_expected[,-1])
+bs2<-na.omit(bs2)
+sum(is.na(bs2$Antagonist))
+
 bs2<-subset(bs_mar_mat_expected[,-1])
 
 #convert data.frame to matrix
@@ -194,8 +319,15 @@ bs3<-data.matrix(bs2)
 bs3_mean<-apply(bs3,2,mean)
 bs3_sd<-apply(bs3,2,sd)
 
-
 #Observed data
+bs_mart_observed<-bs_mart[c(10001), ]
+bs_obs<-subset(bs_mart_observed[,-1])
+bs_o<-data.matrix(bs_obs)
+
+bs_mat_observed<-bs_matas[c(10001), ]
+bs_obs<-subset(bs_mat_observed[,-1])
+bs_o<-data.matrix(bs_obs)
+
 bs_mar_mat_observed<-bs_marti_matas[c(10001), ]
 bs_obs<-subset(bs_mar_mat_observed[,-1])
 bs_o<-data.matrix(bs_obs)
@@ -209,57 +341,97 @@ z.half.alpha = qnorm(1-alpha/2)
 c(-z.half.alpha, z.half.alpha) 
 #[1] -1.959964  1.959964
 
-#No interaction
-z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #1.241986
-# Lower 1−tailed test:
-pnorm(z.abs, lower.tail=T) #p-value: 0.8928792
-# Upper 1−tailed test:
-pnorm(z.abs, lower.tail=F) #p−value: 0.1071208/0.108
-#Random pattern
-
-#MUTUALISM_ANTAGONISM
-z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-1.883184
-# Lower 1−tailed test:
-pnorm(z.mu_ant, lower.tail=T) #p-value: 0.02983775/0.53067
-# Upper 1−tailed test:
-pnorm(z.mu_ant, lower.tail=F) #p−value: 0.9701623
-#less than expected
 
 #MUTUALIST
 z.mut <- (bs_obs$Mutualist - mean(bs2$Mutualist))/sd(bs2$Mutualist) #-0.1496855
 # Lower 1−tailed test:
-pnorm(z.mut, lower.tail=T) #p-value: 0.4405064
+pnorm(z.mut, lower.tail=T) 
+#Martinazo/Matasgordas
+#p=0.9388/0.004932607
+#Both Poulations
+#p-value: 0.4405064/0.4402563
 # Upper 1−tailed test:
-pnorm(z.mut, lower.tail=F) #p−value: 0.5594936
-#Less than expected
 
-#ANTAGONIST
-z.ant <- (bs_obs$Antagonist - mean(bs2$Antagonist))/sd(bs2$Antagonist) #0.741204
-# Lower 1−tailed test:
-pnorm(z.ant, lower.tail=T) #p-value: 0.9363506
-# Upper 1−tailed test:
-pnorm(z.ant, lower.tail=F) #p−value: 0.1745464/0.171
-#Less than expected
-
-#Antagonist-MW
-z.antMW <- (bs_obs$`Antagonist-MW` - mean(bs2$`Antagonist-MW`))/sd(bs2$`Antagonist-MW`) #-2.106286
-# Lower 1−tailed test:
-pnorm(z.antMW, lower.tail=T) #p-value: 0.01758976/0.007
-# Upper 1−tailed test:
-pnorm(z.antMW, lower.tail=F) #p−value: 0.9824102/0.993
-#Less than expected
+pnorm(z.mut, lower.tail=F) 
+#Martinazo/Matasgordas
+#p=0.06117849/0.9950674
+#Both Poulations
+#p−value: 0.5594936/0.5597437
+#Random
 
 #Mutualist-AW
 z.mutAW <- (bs_obs$`Mutualist-AW` - mean(bs2$`Mutualist-AW`))/sd(bs2$`Mutualist-AW`) #1.422037
 # Lower 1−tailed test:
-pnorm(z.mutAW, lower.tail=T) #p-value: 0.9224923/0.709
+pnorm(z.mutAW, lower.tail=T) #p-value: 0.9224923/0.3878097
 # Upper 1−tailed test:
-pnorm(z.mutAW, lower.tail=F) #p−value: 0.0775077/0.291
+pnorm(z.mutAW, lower.tail=F) #p−value: 0.0775077/0.6121903
+#Random
+
+#MUTUALISM_ANTAGONISM
+z.mu_ant <- (bs_obs$`Mutualist-Antagonist` - mean(bs2$`Mutualist-Antagonist`))/sd(bs2$`Mutualist-Antagonist`) #-1.883184
+# Lower 1−tailed test:
+pnorm(z.mu_ant, lower.tail=T) 
+
+#Martinazo/Matasgordas
+#p=0.0008424818/0.9539846
+#Both Poulations
+#p-value: 0.02983775/0.4611286
+# Upper 1−tailed test:
+
+pnorm(z.mu_ant, lower.tail=F) 
+#Martinazo/Matasgordas
+#p=0.9991575/0.04601539
+#Both Poulations
+#p−value: 0.9701623/0.5388714
+#Random
+
+#Antagonist-MW
+z.antMW <- (bs_obs$`Antagonist-MW` - mean(bs2$`Antagonist-MW`))/sd(bs2$`Antagonist-MW`) #-2.106286
+# Lower 1−tailed test:
+pnorm(z.antMW, lower.tail=T) #p-value: 0.01758976/0.03769018
+# Upper 1−tailed test:
+pnorm(z.antMW, lower.tail=F) #p−value: 0.9824102/0.9623098
 #Less than expected
+
+#ANTAGONIST #0.9990001 #0.03160696
+z.ant <- (bs_obs$Antagonist - mean(bs2$Antagonist))/sd(bs2$Antagonist) #0.741204
+# Lower 1−tailed test:
+pnorm(z.ant, lower.tail=T) 
+#Martinazo/Matasgordas
+#p=0.9984268/0.0849225
+
+#Both Poulations
+#p-value: 0.8254536/0.826489
+
+# Upper 1−tailed test:
+pnorm(z.ant, lower.tail=F) 
+#Martinazo/Matasgordas
+#p=0.00157316/0.9150775
+
+#Both Poulations
+#p−value: 0.1745464/0.173511
+#Less than expected
+
+#No interaction
+z.abs <- (bs_obs$No_Interaction - mean(bs2$No_Interaction))/sd(bs2$No_Interaction) #1.241986
+# Lower 1−tailed test:
+pnorm(z.abs, lower.tail=T) 
+#Martinazo/Matasgordas
+#p=0.09739936/0.9902162
+
+#Both Poulations
+#p-value: 0.8928792/0.8905973
+# Upper 1−tailed test:
+pnorm(z.abs, lower.tail=F) 
+#Martinazo/Matasgordas
+#p=0.9026006/0.009783834
+
+#Both Poulations#p−value: 0.1071208/0.1094027
+#Random pattern
 
 ```
 Bar plot of interaction motifs
-```{r Bar plot for interaction motifs}
+```{r Observed and Expected data}
 ###Expected graph
 #Creating long shape with the means of each motif
 expect_data<-melt(bs3_mean,id.vars="Int_motif")
@@ -289,16 +461,47 @@ obs_data["SD"]<-NA     #adding a new column for standard deviation. We leave as 
 
 total<-rbind(obs_data,expect_data) #Joining expected and observed data
 
+```
 
-#ggplot of the observed frequencies of the motifs 
 
+#ggplot of the observed frequencies of the motifs
+```{r Bar plot for Martinazo interaction motifs}
+#Martinazo
+marti_plot<-ggplot(total,aes(x=variable,y=value, fill=Data))+
+       geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
+        xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks = seq(0, 18,2), limits=c(0, 18))+
+       geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
+                width=0.2,   position=position_dodge(0.9))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"))+ 
+                annotate(geom="text", x=1, y=3, label="p=0.061")+annotate(geom="text", x=2, y=12, label="p=0.999")+annotate(geom="text", x=3, y=17, label="p=0.002") +annotate(geom="text", x=4, y=3, label="p=0.903")+theme(legend.title=element_blank())+theme(legend.text=element_blank())+ theme(legend.position='none')+theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))+ggtitle("Martinazo")
+
+```
+
+```{r Bar plot for Matasgordas interaction motifs}
+#Matasgordas
+matas_plot<-ggplot(total,aes(x=variable,y=value, fill=Data))+
+       geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
+        xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks = seq(0, 28,2), limits=c(0, 28))+
+       geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
+                width=0.2,   position=position_dodge(0.9))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"))+ 
+                annotate(geom="text", x=1, y=24, label="p=0.939")+annotate(geom="text", x=2, y=15, label="p=0.046")+annotate(geom="text", x=3, y=8, label="p=0.915") +annotate(geom="text", x=4, y=17, label="p=0.010")+theme(legend.title=element_blank())+theme(legend.text=element_blank())+ theme(legend.position='none')+theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))+ggtitle("Matasgordas")
+```
+
+```{r Bar plot for Both Populations interaction motifs}
+
+#Both populations
 four_motifs<-ggplot(total,aes(x=variable,y=value, fill=Data))+
        geom_bar(stat="identity",position="dodge", colour="black")+    #position an colors of the bars, (dodge refers to side by side bars)
        scale_fill_discrete(name="Data")+ xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
        geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
                 width=0.2,   position=position_dodge(0.9))+
-                scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-Antagonist","Antagonist"))+ 
-                annotate(geom="text", x=1, y=17, label="p=0.107")+annotate(geom="text", x=2, y=21, label="p=0.441")+annotate(geom="text", x=3, y=28, label="p=0.0298") +annotate(geom="text", x=4, y=21, label="p=0.175")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"))+ 
+                annotate(geom="text", x=1, y=22, label="p=0.559")+annotate(geom="text", x=2, y=28, label="p=0.970")+annotate(geom="text", x=3, y=21, label="p=0.175") +annotate(geom="text", x=4, y=18, label="p=0.107")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
                 theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
                 theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
                 
@@ -309,8 +512,8 @@ six_motifs<-ggplot(total,aes(x=variable,y=value, fill=Data))+
        scale_fill_discrete(name="Data")+ xlab("Interaction Motifs")+ylab("Frequency")+ scale_y_continuous(breaks=seq(0.0,40, 2))+
        geom_errorbar(aes(ymin=value-SD, ymax=value+SD),               #addingg the sd to the bars
                 width=0.2,   position=position_dodge(0.9))+
-                scale_x_discrete(limits= c("No_Interaction", "Mutualist","Mutualist-AW","Mutualist-Antagonist","Antagonist-MW","Antagonist"))+ 
-                annotate(geom="text", x=1, y=17, label="p=0.108")+annotate(geom="text", x=2, y=21, label="p=0.441")+annotate(geom="text", x=3, y=5, label="p=0.291") +annotate(geom="text", x=4, y=14, label="p=0.531")+annotate(geom="text", x=5, y=14, label="p=0.007")+annotate(geom="text", x=6, y=21, label="p=0.171")+theme(legend.position = c(0.1,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.2, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-AW","Mutualist-Antagonist","Antagonist-MW","Antagonist","No_Interaction"))+ 
+                annotate(geom="text", x=1, y=21, label="p=0.440")+annotate(geom="text", x=2, y=5, label="p=0.388")+annotate(geom="text", x=3, y=14, label="p=0.461") +annotate(geom="text", x=4, y=15, label="p=0.038")+annotate(geom="text", x=5, y=21, label="p=0.173")+annotate(geom="text", x=6, y=17, label="p=0.109")+theme(legend.position = c(0.5,0.9))+theme(legend.title=element_blank())+theme(legend.text=element_text(size=rel(1.1)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.2, size=12))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=12))+
                 theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+scale_fill_manual(values = c("black", "white"))+ 
                 theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border =                                 element_rect(colour = "black", fill=NA, size=0.5))          #formating the backgorund an lines of the graph
                 
@@ -371,10 +574,10 @@ p+labs(colour="Interaction Motifs")+theme(legend.position = c(0.12,0.88))+theme(
 
 #Plot for dicriminant analysis for population
 p1<-ggplot(im_lda, aes(LD1, LD2, shape= factor(pop)))+geom_point(color="black",fill="white", size= 4, stroke=2)+
-  stat_ellipse(type = "t",linetype=5)+xlim(-5,5)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+  stat_ellipse(type = "t",linetype=5)+xlim(-3.5,3.5)+theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
 
   
-p1+geom_point(aes(colour= factor(im_lda$motif)), fill="white", size= 3)+labs(shape="Population", colour="Interaction Motifs")+ theme(legend.position = c(0.12,0.8))+theme(legend.title =element_text(size=rel(1.4)))+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+p1+geom_point(aes(colour= factor(im_lda$motif)), fill="white", size= 3)+labs(shape="Population", colour="Interaction Motifs")+ theme(legend.position = c(0.88,0.2))+theme(legend.title =element_text(size=rel(1.4)))+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 
 ##Plots with ggord
 
@@ -387,6 +590,16 @@ ggord(im.lda, im_lda$pop, ellipse= TRUE, poly=FALSE)
 # Wilk's lambda, stepwise selection
 library(klaR)
 greedy.wilks(motif~ inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s+sincr_s,data = im_lda, niveau = 0.99)
+#vars Wilks.lambda F.statistics.overall p.value.overall F.statistics.diff p.value.diff
+#      size_s    0.7218341             8.477919    7.636788e-05         8.4779189 7.636788e-05
+#        nn_s    0.6814483             4.580089    2.997530e-04         1.2840649 2.871577e-01
+#  del.area_s    0.6370134             3.526610    5.283730e-04         1.4881078 2.260184e-01
+#    fruits_s    0.6097532             2.860852    1.319086e-03         0.9388470 4.271935e-01
+#       inf_s    0.5960616             2.357703    4.205149e-03         0.4747163 7.009998e-01
+# fruit_set_s    0.5802277             2.039874    1.001953e-02         0.5548762 6.468039e-01
+#     sincr_s    0.5680719             1.791519    2.267396e-02         0.4279695 7.336712e-01
+#      dens_s    0.5606339             1.579991    5.022946e-02         0.2609200 8.532597e-01
+
 #-----------------------------------------------------------------------------
 
 # Function to plot a scatterplot matrix with a classification result

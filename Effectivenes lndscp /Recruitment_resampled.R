@@ -21,29 +21,25 @@ weights <- c(0.012,0,0.286,0.286,0.179,0.179)
 
 
 bs_recrt_avrg <- data.frame("deer"=numeric(0),"wildboar"=numeric(0),"rabbit"=numeric(0),"rat"=numeric(0),"fox"=numeric(0),"badger"=numeric(0))
+bs_recrt_50 <- list()
 for (j in c(1:6)) {
   weight <- weights[j]
   error <- weights_sd[j]
   random_weights <- runif(50,weight-error,weight+error)
+  cumulative_random_values <- numeric(0)
   for (i in 1:nrow(mart_matas_fruits)) {
     random_values <- random_weights*(mart_matas_fruits[i,j])
     average_value <- mean(random_values)
     bs_recrt_avrg[i,j] <- average_value
+    cumulative_random_values <- c(cumulative_random_values,random_values)
   }
+  print(paste0("for column ",j," number of rows is ",length(cumulative_random_values)))
+  bs_recrt_50[[j]] <- cumulative_random_values
 }
 
-
-bs_recrt_avrg <- data.frame("deer"=numeric(0),"wildboar"=numeric(0),"rabbit"=numeric(0),"rat"=numeric(0),"fox"=numeric(0),"badger"=numeric(0))
-for (j in c(1:6)) {
-  weight <- weights[j]
-  error <- weights_sd[j]
-  random_weights <- runif(50,weight-error,weight+error)
-  for (i in 1:nrow(mart_matas_fruits)) {
-    random_values <- random_weights*(mart_matas_fruits[i,j])
-    bs_recrt_avrg[i,j] <- random_values
-  }
-}
-
+bs_recrt_50_df <- data.frame(matrix(unlist(bs_recrt_50),nrow=3500,byrow=F))
+colnames(bs_recrt_50_df) <- c("deer","wildboard","rabbit","rat","fox","badger")
+ 
 #Standard error
 bs_recrt_se<- data.frame("deer_se"=numeric(0),"wildboar_se"=numeric(0),"rabbit_se"=numeric(0),"rat_se"=numeric(0),"fox_se"=numeric(0),"badger_se"=numeric(0))
 for (j in c(1:6)) {

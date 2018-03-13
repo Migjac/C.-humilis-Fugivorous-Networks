@@ -125,7 +125,7 @@ mm_fruits<-subset(mart_matas_fruits[,-7])
 ```
 
 
-Matrix resized by average weights, and adding NA to obtain the median of non-zero interaction values
+#Matrix resized by average weights
 ```{r setup, include=FALSE}
 mrt_fruits <-mutate(mrt_fruits,
     #Resize effects
@@ -163,23 +163,30 @@ mm_fruits<-data.matrix(mm_fruits)
 #mean and sd for each column ("2" indicates that the selected function will be applied to each column ("1" to rows))
 mrt_fruits_mean<-apply(mrt_fruits,1,mean)
 mrt_fruits_sd<-apply(mrt_fruits,1,sd)
+mrt_fruits_sum<-apply(mrt_fruits,1,sum)
 
 mtsg_fruits_mean<-apply(mtsg_fruits,1,mean)
 mtsg_fruits_sd<-apply(mtsg_fruits,1,sd)
+mtsg_fruits_sum<-apply(mtsg_fruits,1,sum)
 
 mm_fruits_mean<-apply(mm_fruits,1,mean)
 mm_fruits_sd<-apply(mm_fruits,1,sd)
+mm_fruits_sum<-apply(mm_fruits,1,sum)
 
 #Creating long shape with the means of each motif
 mrt_fruits_long<-melt(mrt_fruits_mean,id.vars="mean")
 colnames(mrt_fruits_long) <- "fruit_mean"
 mrt_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
-mrt_fruits_long$SE_f<-mrt_fruits_sd/sqrt(length(mrt_fruits_mean)) #adding the values of standard deviation
+mrt_fruits_long$SE_f<-mrt_fruits_sd/sqrt(length(mrt_fruits_mean)) #adding the values of standard error
+mrt_fruits_long["Sum_f"]<-NA  
+mrt_fruits_long$Sum_f<-mrt_fruits_sum
 
 mtsg_fruits_long<-melt(mtsg_fruits_mean,id.vars="mean")
 colnames(mtsg_fruits_long) <- "fruit_mean"
 mtsg_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mtsg_fruits_long$SE_f<-mtsg_fruits_sd/sqrt(length(mtsg_fruits_mean)) #adding the values of standard deviation
+mtsg_fruits_long["Sum_f1"]<-NA  
+mtsg_fruits_long$Sum_f<-mrt_fruits_sum
 
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
