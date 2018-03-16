@@ -19,8 +19,6 @@ Charging matrix of effectiveness of two populations (visit/day*fruits/day)
 ```{r Matrix of effectiveness}
 matrix_effects_resized <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/mart_matas_eff.csv")
 
-
-
 #Wthout "plant" and "unknown" column
 matrix_effects_resized<-matrix_effects_resized[,-1]
 matrix_effects_resized<-matrix_effects_resized[,-7]
@@ -241,6 +239,21 @@ write.csv(boostrap_df, "/Users/apple/desktop/Palmito/Postdoc-Interaction Network
 
 Boxplot for the frequencies of interaction typologies for both populations
 ```{r Boxplots interaction typologies frequency}
+#-------------------------------------
+min.mean.sd.max <- function(x) {
+  r <- c(min(x), mean(x) - sd(x), mean(x), mean(x) + sd(x), max(x))
+  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+  r
+}
+
+# ggplot code
+p1 <- ggplot(aes(y = perc, x = localidad), data = cn)
+p1 <- p1 + stat_summary(fun.data = min.mean.sd.max, geom = "boxplot") + geom_jitter(position=position_jitter(width=.2), size=3) + ggtitle("Boxplot con media, 95%CI, valore min. e max.") + xlab("localidad") + ylab("perc")+scale_y_continuous(limits=c(-20, 100))
+#-------------------------------------------
+
+
+
+
 #Martinazo
 mart_im<-boostrap_df_mart
 

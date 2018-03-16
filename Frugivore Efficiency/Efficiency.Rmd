@@ -265,6 +265,9 @@ write.csv(matas_spplv, "/Users/apple/desktop/Palmito/Postdoc-Interaction Network
 par(mfrow=c(1,1))
 mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
 plotweb(mart_matas_e, col.low=c(gray(seq(0.1,1,length=63))),col.high=c("white","white","gray30","gray30","black","black","darkgray"),method="normal", text.rot=90,low.lablength=10, high.lablength=8)
+
+colSums(mart_matas_e != 0)
+
 ```
 &nbsp;
 &nbsp;

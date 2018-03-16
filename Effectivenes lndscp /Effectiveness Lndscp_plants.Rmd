@@ -50,6 +50,7 @@ mrt_visits_sum<-apply(mrt_visits,1,sum)
 mrt_visits_mean<-apply(mrt_visits,1,mean)
 mrt_visits_sd<-apply(mrt_visits,1,sd)
 
+
 mtsg_visits_sum<-apply(mtsg_visits,1,sum)
 mtsg_visits_mean<-apply(mtsg_visits,1,mean)
 mtsg_visits_sd<-apply(mtsg_visits,1,sd)
@@ -57,6 +58,8 @@ mtsg_visits_sd<-apply(mtsg_visits,1,sd)
 mm_visits_sum<-apply(mm_visits,1,sum)
 mm_visits_mean<-apply(mm_visits,1,mean)
 mm_visits_sd<-apply(mm_visits,1,sd)
+
+
 
 #Creating long shape with the means of each motif
 mrt_visits_long<-melt(mrt_visits_mean,id.vars="mean")
@@ -77,6 +80,9 @@ mm_visits_long<-melt(mm_visits_sum,id.vars="sum")
 colnames(mm_visits_long) <- "visit_sum"
 mm_visits_long["SE"]<-NA  #adding a new column for standard error
 mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_sum)) #adding the values of standard error
+
+table(mm_visits_long)
+summary(mm_visits_long)
 
 #naming the first column
 mrt_visits_long <- add_rownames(mrt_visits_long, "plant")
@@ -234,7 +240,7 @@ mtsg_total$combination<-matas$combination
 
 
 mm_total["pop"]<-NA
-mm_total$pop<-mart_matas_visits$pop
+mm_total$pop<-im_glm$pop
 mm_total["motif"]<-NA
 mm_total$motif<-im_glm$motif
 mm_total["combination"]<-NA
@@ -243,12 +249,12 @@ mm_total$combination<-im_glm$combination
 #Effectiveness plot per plant
 p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=20,
                        myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(legend.position = c(0.15,0.9))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Martinazo")
 
 
 p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
                        myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
+                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Matasgordas")
 
 
 p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean,q2.error=weights_sd, pts.color=mm_total$pop, pts.size=3, nlines=9,
@@ -256,7 +262,7 @@ p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean,q2.error=wei
                        myylab="Fruit removal*Recruitment")
 
 
-p4<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=3, nlines=20,
+p4<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean, pts.color=mm_total$motif, pts.size=5, pts.shape =mm_total$pop,  nlines=25,
                        myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")
+                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(legend.position = c(0.15,0.85))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))
 ```

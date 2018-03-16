@@ -28,7 +28,9 @@ matas<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugiv
 #Both populations
 mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
 
-
+#Count the non-zero visits on a matrix
+animal_visits<-colSums(mart_matas_visits != 0)
+apply(animal_visits,2,sum)
 
 #Without column unknown
 mart_visits<-subset(mart[,-7])
@@ -67,6 +69,8 @@ colnames(mm_visits_long) <- "visit_mean"
 mm_visits_long["SE"]<-NA  #adding a new column for standard error
 mm_visits_long$SE<-mm_visits_sd/sqrt(length(mm_visits_mean)) #adding the values of standard error
 
+sum(mm_visits_long$visit_sum == 0)
+
 #naming the first column
 
 mart_visits_long <- add_rownames(mart_visits_long, "animal")
@@ -88,7 +92,7 @@ mart_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugi
 matas_f<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both poulations
-mart_matas_fruits<-read.csvread.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 
 #Without column unknown
@@ -175,7 +179,6 @@ as.data.frame(mm_total)
 #Effectiveness landscape
 ```{r}
 # Installation.
-devtools::install_github("pakillo/effectiveness_pckg", force=TRUE)
 library(effect.lndscp)
 
 ###Martinazo
@@ -233,7 +236,7 @@ mart_elong <- add_rownames(mart_elong, "animal")
 
 #naming the i_group column
 mart_elong<-mutate(mart_elong,
-     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wild", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
+     i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildb", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 
 #naming the recruit column
 mart_elong<-mutate(mart_elong,
@@ -256,13 +259,13 @@ matas_elong<-mutate(matas_elong,
 recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
 
-mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group,label=mart_elong$animal, nlines=10,
+mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group, pts.size = 5, label=mart_elong$animal, nlines=12,
                        myxlab= "Handled fruits/Visit",
-                       myylab="Plant recruitment")
+                       myylab="Plant recruitment")+ theme(legend.position="none")+ggtitle("Martinazo")
 
-matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group,label=matas_elong$animal, nlines=16,
+matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group, pts.size = 5,label=matas_elong$animal, nlines=16,
                        myxlab= "Handled fruits/Visit",
-                       myylab="Plant recruitment")
+                       myylab="Plant recruitment")+ theme(legend.position="none")+ggtitle("Matasgordas")
 ```
 
 
