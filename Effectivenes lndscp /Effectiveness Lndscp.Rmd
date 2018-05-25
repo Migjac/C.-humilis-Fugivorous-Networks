@@ -122,12 +122,15 @@ matas_fruits_sd<-apply(matas_fruits,2,sd)
 mm_fruits_mean<-apply(mm_fruits,2,mean)
 mm_fruits_sd<-apply(mm_fruits,2,sd)
 
+chisq.test(mart_fruits_mean,matas_fruits_mean)
 #Creating long shape with the means of each motif
 
 mart_fruits_long<-melt(mart_fruits_mean,id.vars="mean")
 colnames(mart_fruits_long) <- "fruit_mean"
 mart_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mart_fruits_long$SE_f<-mart_fruits_sd/sqrt(length(mart_fruits_long)) #adding the values of standard deviation
+mart_fruits_long["dispersed_fruits"]<-mm_total$recruit*mart_fruits_long$fruit_mean
+
 
 matas_fruits_long<-melt(matas_fruits_mean,id.vars="mean")
 colnames(matas_fruits_long) <- "fruit_mean"
@@ -168,7 +171,7 @@ mm_total<-mutate(mm_total,
      i_group = if_else( animal == "deer","Seed-Predator", if_else(animal == "wildboar", "Seed-Predator", if_else(animal == "rabbit", "Deflesher", if_else(animal == "rat", "Deflesher", if_else(animal == "fox", "Seed-Disperser", if_else( animal == "badger", "Seed-Disperser", "ERROR" )))))))
 
 mm_total<-mutate(mm_total,
-     recruit = if_else( animal == "deer","0.01206", if_else(animal == "wildboar","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.01206", if_else(animal == "wildboar","0" , if_else(animal == "rabbit", "0.24", if_else(animal == "rat", "0.24", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(mm_total$recruit)
 mm_total<-cbind(mm_total[,-7],recruit)
@@ -179,6 +182,7 @@ as.data.frame(mm_total)
 #Effectiveness landscape
 ```{r}
 # Installation.
+devtools::install_github("pakillo/effectiveness_pckg", force=TRUE)
 library(effect.lndscp)
 
 ###Martinazo
@@ -240,7 +244,7 @@ mart_elong<-mutate(mart_elong,
 
 #naming the recruit column
 mart_elong<-mutate(mart_elong,
-     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildb","0" , if_else(animal == "rabbit", "0.24", if_else(animal == "rat", "0.24", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(mart_elong$recruit)
 mart_elong<-cbind(mart_elong[,-4],recruit)
@@ -254,12 +258,12 @@ matas_elong<-mutate(matas_elong,
 
 #naming the recruit column
 matas_elong<-mutate(matas_elong,
-     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildboar","0" , if_else(animal == "rabbit", "0.286", if_else(animal == "rat", "0.286", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
+     recruit = if_else( animal == "deer","0.012", if_else(animal == "wildboar","0" , if_else(animal == "rabbit", "0.24", if_else(animal == "rat", "0.24", if_else(animal == "fox", "0.179", if_else( animal == "badger", "0.179", "ERROR" )))))))
 
 recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
 
-mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group, pts.size = 5, label=mart_elong$animal, nlines=12,
+mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group, pts.size = 5, label=mart_elong$animal, nlines=15,
                        myxlab= "Handled fruits/Visit",
                        myylab="Plant recruitment")+ theme(legend.position="none")+ggtitle("Martinazo")
 

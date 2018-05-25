@@ -104,19 +104,34 @@ summary(m1)
 ```
 
 
-```{r Efficiency}
-mart_matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
+```{r preparing Efficiency data set}
+mart_matas_e1<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
+
+mart_matas_stnd<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/stnd_var.csv")
+
+#Standardized explanatory variables
+
+f_glmm1<-standardize(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens+spp_str+norm_d,data = mart_matas_e1, family=quasibinomial)
+f_glmm1
+f_glmm1$call
+f_glmm1$scale
+f_glmm1$family
+f_glmm1$data
+f_glmm1$contrasts
+f_glmm1$groups
+stnd_fe<-f_glmm1$data
+
+write.csv(stnd_fe,"/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/stnd_var.csv")
 
 #Multiplying by the probability of recruitment
 rabbit_weight=0.286
 rat_weight=0.286
 fox_weight=0.179
 badger_weight=0.179
-deer_weight=0.0115
 wildb_weight=0
 deer_weight=0.0112
 
-mart_matas_e <-mutate(mart_matas_e,
+mart_matas_e1 <-mutate(mart_matas_e1,
     #Resize effects
     rabbit = rabbit * rabbit_weight,
     rat = rat * rat_weight,
@@ -126,7 +141,7 @@ mart_matas_e <-mutate(mart_matas_e,
     deer=deer*deer_weight)
 
 #subset only animal interactions
-fe<-subset(mart_matas_e[2:7])
+fe<-subset(mart_matas_e1[2:7])
 
 #convert data.frame to matrix
 fe<-data.matrix(fe)
@@ -134,6 +149,12 @@ fe<-data.matrix(fe)
 #mean and sum for each row (1)
 fe_mean<-apply(fe,1,mean)
 fe_sum<-apply(fe,1,sum)
+fe_sd<-apply(fe,1,sd)
+
+
+#mean and sum for each column (2)
+fe_mean<-apply(fe,2,mean)
+fe_sd<-apply(fe,2,sd)
 
 
 #Creating long shape with the means of each plant
@@ -141,54 +162,81 @@ fe_long<-melt(fe_mean,id.vars="mean")
 colnames(fe_long) <- "mean_eff"
 fe_long_sum<-melt(fe_sum,id.vars="sum")
 colnames(fe_long_sum) <- "sum_eff"
-
+fe_long_sd<-melt(fe_sd,id.vars="SD")
+colnames(fe_long_sd) <- "SD"
 
 #Adding new columns of visits summaries 
-mart_matas_e["mean_eff"]<-NA
-mart_matas_e$mean_eff<-fe_long$mean_eff
+mart_matas_e1["mean_eff"]<-NA
+mart_matas_e1$mean_eff<-fe_long$mean_eff
 
-mart_matas_e["sum_eff"]<-NA
-mart_matas_e$sum_eff<-fe_long_sum$sum_eff
+mart_matas_e1["sum_eff"]<-NA
+mart_matas_e1$sum_eff<-fe_long_sum$sum_eff
 
-
-#####GLMM efficiency*recruitment####
-
-#Mean recruitment by standardized traits and normalized degree
-fe_glm<-glm(mean_eff~inf_s+norm_d+spp_str+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
-fe_glm
-summary(fe_glm)
-anova(fe_glm, test="Chisq")
-lsmeans(fe_glm,"motif",transform="response")
-summary(glht(fe_glm, mcp(motif="Tukey")))
-
-#Mean recruitment by motif and standardized traits and normalized degree
-fe_glm1<-glm(mean_eff~inf_s+motif+norm_d+size_s+sincr_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,data = mart_matas_e)
-fe_glm1
-summary(fe_glm1)
-anova(fe_glm1, test="Chisq")
-lsmeans(fe_glm1,"motif",transform="response")
-summary(glht(fe_glm1, mcp(motif="Tukey")))
-
-#Mean recruitment and standardized traits with population as random
-library(nlme)
-fe_glmm2<-lme(mean_eff~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s, random=~1| pop,data = mart_matas_e)
-fe_glmm2
-summary(fe_glmm2)
-anova(fe_glmm2, test="Chisq")
-lsmeans(fe_glmm2,"motif",transform="response")
-
-#Mean recruitment by motif and standardized traits with population as random
-fe_glmm3<-lme(mean_eff~inf_s+motif+norm_d+spp_str+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s, random=~1| pop,data = mart_matas_e)
-fe_glmm3
-summary(fe_glmm3)
-anova(fe_glmm3, test="Chisq")
-lsmeans(fe_glmm3,"motif",transform="response")
-summary(glht(fe_glmm3, mcp(motif="Tukey")))
+mart_matas_e1["SD"]<-NA
+mart_matas_e1$SD<-fe_long_sd$SD
 
 
 
+#Boxplot
 
-#GLMM with network indexes
+min.mean.sd.max <- function(x) {
+  r <- c(min(x), mean(x) - (sd(x)/nrow(x)^1/2), mean(x), mean(x) + (sd(x)/nrow(x)^1/2), max(x))
+  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+  r
+}
+
+# ggplot code
+p1 <-ggplot(mart_matas_e1, aes(x=motif, y=mean_eff))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "CPR", breaks = seq(0, 0.08,0.01), limits=c(0, 0.08))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+
+p1 <- p1 + stat_summary(fun.data = min.mean.sd.max, geom = "boxplot") + geom_jitter(position=position_jitter(width=.2), size=1) + ggtitle("Martinazo") + xlab("Motif") + ylab("Frequency")
+
+
+```
+
+
+```{r GLMM Efficiency withour No_Interaction}
+####Model without No_interaction#####
+mm_e1<-subset(mart_matas_e1, motif != "No_Interaction")
+f_glmm_ni<-glm(mean_eff~motif+size_s+nn_s+del.area_s+fruits_s+inf_s+fruit_set_s+sincr_s+dens_s+pop,data = mm_e1, family=quasibinomial)
+f_glmm_ni
+summary(f_glmm_ni)
+summary(glht(f_glmm_ni, mcp(motif="Tukey")))
+summary(glht(f_glmm_ni, mcp(pop="Tukey")))
+
+#Standardized response variable####
+mm_e1<-subset(mart_matas_stnd, motif != "No_Interaction")
+mm_e1<-subset(mm_e1, plant != "ER080H")
+f_glmm_ni<-lme(mean_eff~motif+size+nn+del.area+fruits+inf+fruit_set+sincr+dens+pop,data = mm_e1, family=quasibinomial)
+f_glmm_ni
+anova(f_glmm_ni,test="Chisq")
+summary(f_glmm_ni)
+summary(glht(f_glmm_ni, mcp(motif="Tukey")))
+summary(glht(f_glmm_ni, mcp(pop="Tukey")))
+
+
+f_glmm_ni<-lme(mean_eff~motif+size+nn+del.area+fruits+inf+fruit_set+sincr+dens, random=~1| pop,data = mm_e1)
+f_glmm_ni
+anova(f_glmm_ni,test="Chisq")
+summary(f_glmm_ni)
+lsmeans(f_glmm_ni, pairwise~motif, adjust="tukey")
+
+
+summary(glht(f_glmm_ni, linfct=mcp(motif="Tukey")))
+
+summary(glht(f_glmm_ni, mcp(motif="Tukey")))
+summary(glht(f_glmm_ni, mcp(pop="Tukey")))
+
+
+#Boxplot
+bp_gg_mart4<-ggplot(mart_matas_stnd, aes(x=motif, y=mean_eff))+
+                scale_x_discrete(limits= c("Mutualist","Mutualist-Antagonist","Antagonist","No_Interaction"), name="Interaction motifs")+scale_y_continuous(name = "Recruitment effectiveness mean", breaks = seq(0, 0.1,0.01), limits=c(0, 0.1))+geom_boxplot()+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5))+ 
+                theme(panel.background = element_blank(),axis.line = element_line(size = 0.5, linetype = "solid", colour = "black"),panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+```
+
+```{r GLMM Efficiency}
+#GLMM with network indexes as response variable
 
 net_glmm1<-lme(norm_d~inf_s+size_s+fruits_s+fruit_set_s+del.area_s+nn_s+dens_s,random=~1| pop, data = mart_matas_e)
 net_glmm1
@@ -220,31 +268,6 @@ summary(net_glmm4)
 anova(net_glmm4, test="Chisq")
 anova(net_glmm4, type="III")
 lsmeans(net_glmm4,"motif",transform="response")
-
-
-
-
-#Standardized explanatory variables
-f_glmm<-glm(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens,data = mart_matas_e)
-f_glmm
-summary(f_glmm)
-anova(f_glmm, test="Chisq")
-lsmeans(f_glmm,"motif",transform="response")
-plot(f_glmm)
-
-
-f_glmm1<-standardize(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens,data = mart_matas_e)
-f_glmm1
-f_glmm1$call
-f_glmm1$scale
-f_glmm1$family
-f_glmm1$data
-f_glmm1$contrasts
-f_glmm1$groups
-stnd_fe<-f_glmm1$data
-
-write.csv(stnd_fe,"/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/stnd_var.csv")
-
 
 
 ```

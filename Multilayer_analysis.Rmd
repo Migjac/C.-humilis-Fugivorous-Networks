@@ -1,0 +1,67 @@
+---
+title: "MuxViz"
+author: "Miguel Jacome"
+date: "14/5/2018"
+output: html_document
+---
+
+```{r Data Frame}
+coord<-read.csv("/Users/apple/Desktop/Palmito/Doctorado Spatial Analysis/Bases de datos/Coordenadas palmitos/Archivos coordenadas completas/coord_net.csv")
+im_glm_4<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
+plant_names<-im_glm_4$plant
+plant_names<-as.factor(plant_names)
+mart_plants<-subset(plant_names[,47:70])
+
+im_glm_5<-subset(im_glm_4[1:7])
+#im_glm_4["nodeID"]<-1:70
+#im_glm_4<-im_glm_4[,c(7,1,2,3,4,5,6)]
+#im_glm_4["nodeLong"]<-coord$x
+#im_glm_4["nodeLat"]<-coord$y
+
+#Martinazo
+mart_mux<-subset(im_glm_5[47:70,])
+mart_mux["node_plant"]<-1:24
+mart_mux<-mart_mux[,c(8,2,3,4,5,6,7,1)]
+
+#Matasgordas
+matas_mux<-subset(im_glm_5[1:46,])
+matas_mux["node_plant"]<-1:46
+matas_mux<-matas_mux[,c(8,2,3,4,5,6,7,1)]
+```
+
+```{r Modifying data}
+
+#Martinazo
+mart_mux_lomg<-melt(mart_mux,id.vars="node_plant")
+mart_mux_lomg<-mutate(mart_mux_lomg,node_animal = if_else( variable == "deer","25", if_else(variable == "wildboar", "26", if_else( variable == "rabbit","27", if_else( variable == "rat","28", if_else( variable == "fox","29", if_else(variable == "badger", "30", "ERROR" )))))))
+mart_mux_lomg<-mutate(mart_mux_lomg,node_Layer = if_else( node_animal == "1","1", if_else(node_animal == "2", "1", if_else( node_animal == "3","2", if_else( node_animal == "4","2", if_else( node_animal == "5","2", if_else(node_animal == "6", "2", "ERROR" )))))))
+
+write.table(mart_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mart.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+
+#Matasgordas
+mata_mux_lomg<-melt(matas_mux,id.vars="node_plant")
+mata_mux_lomg<-mutate(mata_mux_lomg,node_animal = if_else( variable == "deer","47", if_else(variable == "wildboar", "48", if_else( variable == "rabbit","49", if_else( variable == "rat","50", if_else( variable == "fox","51", if_else(variable == "badger", "52", "ERROR" )))))))
+mata_mux_lomg<-mutate(mata_mux_lomg,node_Layer = if_else( node_animal == "47","1", if_else(node_animal == "48", "1", if_else( node_animal == "49","2", if_else( node_animal == "50","2", if_else( node_animal == "51","2", if_else(node_animal == "52", "2", "ERROR" )))))))
+mata_mux_lomg["layer_plant"]<-mata_mux_lomg$node_Layer
+mata_mux_lomg<-subset(mata_mux_lomg[,-2])
+
+mata_mux_lomg<-sapply(mata_mux_lomg, as.numeric )
+mata_mux_lomg<-mata_mux_lomg[,c(1,5,3,4,2)]
+
+write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mata.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+
+#eliminating all "0" values in each row
+mata_mux_lomg<-mata_mux_lomg[apply(mata_mux_lomg!=0, 1, all),]
+write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mata0.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+```
+
+
+
+
+
+
+
+
+
+
+

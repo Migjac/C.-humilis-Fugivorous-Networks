@@ -96,15 +96,15 @@ mm_visits_long <- add_rownames(mm_visits_long, "plant")
 ```{r Recruitment probability}
 
 #Multiplying by the probability of recruitment
-rat_weight=0.286
-rabbit_weight=0.286
+rat_weight=0.24
+rabbit_weight=0.24
 fox_weight=0.179
 badger_weight=0.179
 deer_weight=0.012
 wildb_weight=0
 
-rb_sd=0.01
-rt_sd=0.01
+rb_sd=0.007
+rt_sd=0.007
 f_sd=0.04
 b_sd=0.04
 d_sd=0.001
@@ -192,7 +192,7 @@ colnames(mtsg_fruits_long) <- "fruit_mean"
 mtsg_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mtsg_fruits_long$SE_f<-mtsg_fruits_sd/sqrt(length(mtsg_fruits_mean)) #adding the values of standard deviation
 mtsg_fruits_long["Sum_f1"]<-NA  
-mtsg_fruits_long$Sum_f<-mrt_fruits_sum
+mtsg_fruits_long$Sum_f<-mtsg_fruits_sum
 
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
@@ -228,7 +228,7 @@ mrt_total$pop<-marti$pop
 mrt_total["motif"]<-NA
 mrt_total$motif<-marti$motif
 mrt_total["combination"]<-NA
-mrt_total$motif<-marti$motif
+mrt_total$motif<-marti$combination
 
 
 mtsg_total["pop"]<-NA
@@ -247,14 +247,14 @@ mm_total["combination"]<-NA
 mm_total$combination<-im_glm$combination
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=3, nlines=20,
-                       myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(legend.position = c(0.15,0.9))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Martinazo")
+p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=4, nlines=20,
+                       myxlab= "Visit rate (/day)",
+                       myylab="Fruit removal * Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(legend.position = c(0.15,0.9))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Martinazo")
 
 
-p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$motif,pts.size=3, nlines=16,
-                       myxlab= "Visit/day",
-                       myylab="Fruit removal*Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Matasgordas")
+p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$combination,pts.size=4, nlines=16,
+                       myxlab= "Visit rate (/day)",
+                       myylab="Fruit removal * Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Matasgordas")
 
 
 p3<-effectiveness_plot(q1=mm_total$visit_sum,q2=mm_total$fruit_mean,q2.error=weights_sd, pts.color=mm_total$pop, pts.size=3, nlines=9,
