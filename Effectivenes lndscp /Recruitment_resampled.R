@@ -52,3 +52,14 @@ for (j in c(1:6)) {
     bs_recrt_se[i,j] <- error_average_value
   }
 }
+
+
+
+
+# aggregate data frame mtcars by cyl and vs, returning means
+# for numeric variables
+attach(mtcars)
+aggdata <-aggregate(mtcars, by=list(cyl,vs), 
+                    FUN=mean, na.rm=TRUE)
+print(aggdata)
+detach(mtcars)

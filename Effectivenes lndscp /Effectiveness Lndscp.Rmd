@@ -185,10 +185,11 @@ as.data.frame(mm_total)
 devtools::install_github("pakillo/effectiveness_pckg", force=TRUE)
 library(effect.lndscp)
 
+
 ###Martinazo
 
 p1<-effectiveness_plot(q1=mart_total$visit_mean,q2=mart_total$fruit_mean, q1.error =mart_total$SE, q2.error = mart_total$SE_f, pts.color=mart_total$i_group,label=mart_total$animal, nlines=8, 
-                   myxlab= "No. visits/10d", 
+                   myxlab= "No. records/10d", 
    myylab="Proportion of fruits handled")
 p1+ ggtitle("Martinazo's dwarf palm frugivorus")
 
@@ -206,10 +207,10 @@ p2+ ggtitle("Martasgordas's dwarf palm frugivorous")
 
 ```{r, Effectiveness and seedling survival}
 #Martinazo
-mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/mart_eff_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/matas_eff.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_e<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Frugivore Efficiency/matas_eff_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Wihout unknown
 mart_e<-subset(mart_e[,-7])
@@ -264,12 +265,15 @@ recruit<-as.numeric(matas_elong$recruit)
 matas_elong<-cbind(matas_elong[,-4],recruit)
 
 mart_effect<-effectiveness_plot(q1=mart_elong$Effectiveness,q2=mart_elong$recruit, pts.color=mart_elong$i_group, pts.size = 5, label=mart_elong$animal, nlines=15,
-                       myxlab= "Handled fruits/Visit",
+                       myxlab= "Handled fruits/Record",
                        myylab="Plant recruitment")+ theme(legend.position="none")+ggtitle("Martinazo")
 
-matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group, pts.size = 5,label=matas_elong$animal, nlines=16,
-                       myxlab= "Handled fruits/Visit",
+matas_effect<-effectiveness_plot(q1=matas_elong$Effectiveness,q2=matas_elong$recruit, pts.color=matas_elong$i_group, pts.size = 5,label=matas_elong$animal, nlines=20,
+                       myxlab= "Handled fruits/Record",
                        myylab="Plant recruitment")+ theme(legend.position="none")+ggtitle("Matasgordas")
+
+
+mart_mat_effect<-grid.arrange(mart_effect, matas_effect, nrow = 1)
 ```
 
 

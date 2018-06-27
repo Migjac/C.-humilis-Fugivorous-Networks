@@ -105,13 +105,13 @@ summary(m1)
 
 
 ```{r preparing Efficiency data set}
-mart_matas_e1<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
+mart_matas_e1<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4_1.csv")
 
-mart_matas_stnd<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/stnd_var.csv")
+mart_matas_stnd<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/stnd_var.csv")
 
 #Standardized explanatory variables
 
-f_glmm1<-standardize(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens+spp_str+norm_d,data = mart_matas_e1, family=quasibinomial)
+f_glmm1<-standardize(mean_eff~inf+motif+size+sincr+fruits+fruit_set+del.area+nn+dens,data = mart_matas_e1)
 f_glmm1
 f_glmm1$call
 f_glmm1$scale
@@ -196,7 +196,7 @@ p1 <- p1 + stat_summary(fun.data = min.mean.sd.max, geom = "boxplot") + geom_jit
 ```
 
 
-```{r GLMM Efficiency withour No_Interaction}
+```{r GLMM Efficiency without No_Interaction}
 ####Model without No_interaction#####
 mm_e1<-subset(mart_matas_e1, motif != "No_Interaction")
 f_glmm_ni<-glm(mean_eff~motif+size_s+nn_s+del.area_s+fruits_s+inf_s+fruit_set_s+sincr_s+dens_s+pop,data = mm_e1, family=quasibinomial)
@@ -216,11 +216,15 @@ summary(glht(f_glmm_ni, mcp(motif="Tukey")))
 summary(glht(f_glmm_ni, mcp(pop="Tukey")))
 
 
-f_glmm_ni<-lme(mean_eff~motif+size+nn+del.area+fruits+inf+fruit_set+sincr+dens, random=~1| pop,data = mm_e1)
+mm_e1<-subset(mart_matas_stnd, motif != "No_Interaction")
+f_glmm_ni<-lme(mean_eff~motif+size+nn+del.area+fruits+inf+fruit_set+sincr+dens, random=list(~1|pop,~1|plant), data = mm_e1)
 f_glmm_ni
 anova(f_glmm_ni,test="Chisq")
 summary(f_glmm_ni)
 lsmeans(f_glmm_ni, pairwise~motif, adjust="tukey")
+
+
+f_glmm_ni<-glmer(mean_eff~motif+size+nn+del.area+fruits+inf+fruit_set+sincr+dens +(1|pop)+ (1|plant), data = mm_e1)
 
 
 summary(glht(f_glmm_ni, linfct=mcp(motif="Tukey")))

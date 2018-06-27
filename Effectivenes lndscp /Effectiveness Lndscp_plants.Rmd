@@ -21,10 +21,10 @@ Opening a matrix file with weighted visits of frugivores in individual plants, t
 
 ```{r opening visits matrix}
 #Martinazo
-mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_visit_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_v<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/matas_visit_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both populations
 mart_matas_visits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Visitation rate/mart_mat_visit.csv",header=TRUE,check.names=FALSE,row.names=1)
@@ -114,10 +114,10 @@ d_sd=0.001
 Opening a matrix file with weighted links with frugivores fruit removal in individual plants. Other specifications of the matrix are described in the fruits visits file. *Note: fruit removal= animal-fruits-days/total-fruits.*
 ```{r Transform fruits matrix}
 #Martinazo
-mart_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+mart_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_fruits_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Matasgordas
-matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
+matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/matas_fruits_1.csv",header=TRUE,check.names=FALSE,row.names=1)
 
 #Both poulations
 mart_matas_fruits<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Fruit removal/mart_matas_fruits.csv",header=TRUE,check.names=FALSE,row.names=1)
@@ -192,7 +192,7 @@ colnames(mtsg_fruits_long) <- "fruit_mean"
 mtsg_fruits_long["SE_f"]<-NA  #adding a new column for standard deviation
 mtsg_fruits_long$SE_f<-mtsg_fruits_sd/sqrt(length(mtsg_fruits_mean)) #adding the values of standard deviation
 mtsg_fruits_long["Sum_f1"]<-NA  
-mtsg_fruits_long$Sum_f<-mtsg_fruits_sum
+mtsg_fruits_long$Sum_f1<-mtsg_fruits_sum
 
 mm_fruits_long<-melt(mm_fruits_mean,id.vars="mean")
 colnames(mm_fruits_long) <- "fruit_mean"
@@ -214,11 +214,13 @@ weights_sd<-c(0.001,0,0.01,0.01,0.04,0.04)
 #Join coulumns
 mrt_total<-cbind(mrt_visits_long,mrt_fruits_long)
 mtsg_total<-cbind(mtsg_visits_long,mtsg_fruits_long)
+
+mm_tt<-rbind(mtsg_fruits_long, mrt_fruits_long)
 mm_total<-cbind(mm_visits_long,mm_fruits_long)
 
 
 #Adding columns pop and motif
-im_glm <- read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_lda_4.csv")
+im_glm <- read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_4.csv")
 
 marti<-im_glm[im_glm$pop == 'Martinazo',]
 matas<-im_glm[im_glm$pop == 'Matasgordas',]
@@ -228,7 +230,7 @@ mrt_total$pop<-marti$pop
 mrt_total["motif"]<-NA
 mrt_total$motif<-marti$motif
 mrt_total["combination"]<-NA
-mrt_total$motif<-marti$combination
+mrt_total$combination<-marti$combination
 
 
 mtsg_total["pop"]<-NA
@@ -247,12 +249,12 @@ mm_total["combination"]<-NA
 mm_total$combination<-im_glm$combination
 
 #Effectiveness plot per plant
-p1<-effectiveness_plot(q1=mrt_total$sum,q2=mrt_total$fruit_mean, pts.color= mrt_total$motif,pts.size=4, nlines=20,
-                       myxlab= "Visit rate (/day)",
+p1<-effectiveness_plot(q1=mrt_total$visit_mean,q2=mrt_total$fruit_mean, pts.color= mrt_total$combination,pts.size=4, nlines=200,
+                       myxlab= "Visit mean",
                        myylab="Fruit removal * Recruitment")+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(legend.position = c(0.15,0.9))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Martinazo")
 
 
-p2<-effectiveness_plot(q1=mtsg_total$sum,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$combination,pts.size=4, nlines=16,
+p2<-effectiveness_plot(q1=mtsg_total$visit_mean,q2=mtsg_total$fruit_mean, pts.color= mtsg_total$combination,pts.size=4, nlines=16,
                        myxlab= "Visit rate (/day)",
                        myylab="Fruit removal * Recruitment")+theme(legend.position = c(0.2,0.9))+theme(legend.title =element_blank())+theme(legend.text=element_text(size=rel(1.3)))+ theme(axis.title.x = element_text(size=15),axis.text.x = element_text(vjust=0.5, size=14))+theme(axis.title.y = element_text(size=15),axis.text.y = element_text(vjust=0.5, size=14))+ggtitle("Matasgordas")
 

@@ -52,7 +52,7 @@ write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Net
 
 #eliminating all "0" values in each row
 mata_mux_lomg<-mata_mux_lomg[apply(mata_mux_lomg!=0, 1, all),]
-write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mata0.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mata0_1.txt", col.names = FALSE, row.names = FALSE, sep = " ")
 ```
 
 
