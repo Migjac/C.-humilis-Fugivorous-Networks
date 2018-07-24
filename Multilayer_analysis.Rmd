@@ -7,26 +7,58 @@ output: html_document
 
 ```{r Data Frame}
 coord<-read.csv("/Users/apple/Desktop/Palmito/Doctorado Spatial Analysis/Bases de datos/Coordenadas palmitos/Archivos coordenadas completas/coord_net.csv")
-im_glm_4<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/im_glm_4.csv")
-plant_names<-im_glm_4$plant
-plant_names<-as.factor(plant_names)
-mart_plants<-subset(plant_names[,47:70])
 
-im_glm_5<-subset(im_glm_4[1:7])
-#im_glm_4["nodeID"]<-1:70
-#im_glm_4<-im_glm_4[,c(7,1,2,3,4,5,6)]
-#im_glm_4["nodeLong"]<-coord$x
-#im_glm_4["nodeLat"]<-coord$y
+#fruits per record multiplex
+fruits_record<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Fruits_record.csv")
+
+#Multiplying by the probability of recruitment
+rabbit_weight=0.286
+rat_weight=0.286
+fox_weight=0.179
+badger_weight=0.179
+wildb_weight=0
+deer_weight=0.0112
+
+mart_matas_rec <-mutate(fruits_record,
+    #Resize effects
+    rabbit = rabbit * rabbit_weight,
+    rat = rat * rat_weight,
+    fox = fox * fox_weight,
+    badger = badger * badger_weight,
+    wildboar= wildboar * wildb_weight,
+    deer=deer*deer_weight)
+
+mart_rec<-subset(mart_matas_rec[47:70,])
+matas_rec<-subset(mart_matas_rec[1:46,])
+
+#mean of recruitment plant
+fruits_record["mean_rec"]<-apply(mart_matas_rec[,2:6],1,mean)
+apply(mart_matas_rec[,2:6],2,mean)
 
 #Martinazo
-mart_mux<-subset(im_glm_5[47:70,])
+mart_mux<-subset(fruits_record[47:70,])
 mart_mux["node_plant"]<-1:24
-mart_mux<-mart_mux[,c(8,2,3,4,5,6,7,1)]
+mart_mux<-mart_mux[,c(9,2,3,4,5,6,7,8,1)]
+
+mart_mux1<-mart_rec
+mart_mux1["node_plant"]<-1:24
+mart_mux1<-mart_mux1[,c(8,2,3,4,5,6,7,1)]
+
+
+#Mean effectiveness of frugivores
+apply(mart_rec[,2:7],2,mean)
 
 #Matasgordas
-matas_mux<-subset(im_glm_5[1:46,])
+matas_mux<-subset(fruits_record[1:46,])
 matas_mux["node_plant"]<-1:46
-matas_mux<-matas_mux[,c(8,2,3,4,5,6,7,1)]
+matas_mux<-matas_mux[,c(9,2,3,4,5,6,7,8,1)]
+
+matas_mux1<-matas_rec
+matas_mux1["node_plant"]<-1:46
+matas_mux1<-matas_mux1[,c(8,2,3,4,5,6,7,1)]
+
+#Mean effectiveness of frugivores
+apply(matas_rec[,2:7],2,mean)
 ```
 
 ```{r Modifying data}
@@ -34,9 +66,15 @@ matas_mux<-matas_mux[,c(8,2,3,4,5,6,7,1)]
 #Martinazo
 mart_mux_lomg<-melt(mart_mux,id.vars="node_plant")
 mart_mux_lomg<-mutate(mart_mux_lomg,node_animal = if_else( variable == "deer","25", if_else(variable == "wildboar", "26", if_else( variable == "rabbit","27", if_else( variable == "rat","28", if_else( variable == "fox","29", if_else(variable == "badger", "30", "ERROR" )))))))
-mart_mux_lomg<-mutate(mart_mux_lomg,node_Layer = if_else( node_animal == "1","1", if_else(node_animal == "2", "1", if_else( node_animal == "3","2", if_else( node_animal == "4","2", if_else( node_animal == "5","2", if_else(node_animal == "6", "2", "ERROR" )))))))
+mart_mux_lomg<-mutate(mart_mux_lomg,node_Layer = if_else( node_animal == "25","1", if_else(node_animal == "26", "1", if_else( node_animal == "27","2", if_else( node_animal == "28","2", if_else( node_animal == "29","2", if_else(node_animal == "30", "2", "ERROR" )))))))
 
-write.table(mart_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mart.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+
+mart_mux_lomg1<-melt(mart_mux1,id.vars="node_plant")
+mart_mux_lomg1<-mutate(mart_mux_lomg1,node_animal = if_else( variable == "deer","25", if_else(variable == "wildboar", "26", if_else( variable == "rabbit","27", if_else( variable == "rat","28", if_else( variable == "fox","29", if_else(variable == "badger", "30", "ERROR" )))))))
+mart_mux_lomg1<-mutate(mart_mux_lomg1,node_Layer = if_else( node_animal == "25","1", if_else(node_animal == "26", "1", if_else( node_animal == "27","2", if_else( node_animal == "28","2", if_else( node_animal == "29","2", if_else(node_animal == "30", "2", "ERROR" )))))))
+
+
+write.table(mart_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction_Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_mart_2/multi_mart_mean.txt", col.names = FALSE, row.names = FALSE, sep = " ")
 
 #Matasgordas
 mata_mux_lomg<-melt(matas_mux,id.vars="node_plant")
@@ -52,7 +90,7 @@ write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Net
 
 #eliminating all "0" values in each row
 mata_mux_lomg<-mata_mux_lomg[apply(mata_mux_lomg!=0, 1, all),]
-write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matasgordas/multi_mata0_1.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+write.table(mata_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction_Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_matas_2/multi_mata0_1.txt", col.names = FALSE, row.names = FALSE, sep = " ")
 ```
 
 
