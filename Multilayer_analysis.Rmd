@@ -7,6 +7,7 @@ output: html_document
 
 ```{r Data Frame}
 coord<-read.csv("/Users/apple/Desktop/Palmito/Doctorado Spatial Analysis/Bases de datos/Coordenadas palmitos/Archivos coordenadas completas/coord_net.csv")
+#mart <- add_rownames(mart, "plant") #naming the first column
 
 #fruits per record multiplex
 fruits_record<-read.csv("~/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Fruits_record.csv")
@@ -77,6 +78,7 @@ apply(matas_rec[,2:7],2,mean)
 mart_mux_lomg<-melt(mart_mux,id.vars="node_plant")
 mart_mux_lomg<-mutate(mart_mux_lomg,node_animal = if_else( variable == "deer_a","25",if_else(variable == "deer_m", "25", if_else(variable == "wildboar", "26", if_else( variable == "rabbit","27", if_else( variable == "rat","28", if_else( variable == "fox","29", if_else(variable == "badger", "30", "ERROR" ))))))))
 
+
 mart_mux_lomg<-mutate(mart_mux_lomg,node_Layer = if_else( node_animal == "25","1", if_else(node_animal == "26", "1", if_else( node_animal == "27","2", if_else( node_animal == "28","2", if_else( node_animal == "29","2", if_else(node_animal == "30", "2", "ERROR" )))))))
 
 
@@ -86,6 +88,30 @@ mart_mux_lomg1<-mutate(mart_mux_lomg1,node_Layer = if_else( node_animal == "25",
 
 
 write.table(mart_mux_lomg, "/Users/apple/desktop/Palmito/Postdoc-Interaction_Networks/C.-humilis-Fugivorous-Networks/muxViz-master/data/Multilayer_mart_2/multi_mart_new.txt", col.names = FALSE, row.names = FALSE, sep = " ")
+
+
+#Bipartite d3
+
+mart_mux_lomg<-melt(mart_mux,id.vars="plant")
+columns<-c("Primary","Secondary","Frugivory")
+colnames(mart_mux_lomg)<-columns
+
+bipartite_D3(mart_mux_lomg, filename = "maritd3_frug",PrimaryLab = "Plant", SecondaryLab = "Animal", SiteNames = "Martinazo",colouroption = c("brewer"))
+
+mart_mux_lomg_eff<-melt(mart_mux1,id.vars="plant")
+columns<-c("Primary","Secondary","Frugivory")
+colnames(mart_mux_lomg_eff)<-columns
+
+bipartite_D3(mart_mux_lomg_eff, filename = "martid3_eff",PrimaryLab = "Plant", SecondaryLab = "Animal", SiteNames = "Martinazo",colouroption = c("brewer"))
+
+#two webs
+doublewbs<-mart_mux_lomg 
+doublewbs["efficency"]<-mart_mux_lomg_eff$Frugivory
+process<-c("Frugivory", "Seed dispersal")
+
+bipartite_D3(doublewbs, filename = "martid3_frg_eff",PrimaryLab = "Plant", SecondaryLab = "Animal", SiteNames = process,colouroption = c("brewer"))
+
+
 
 #Matasgordas
 mata_mux_lomg<-melt(matas_mux,id.vars="node_plant")
