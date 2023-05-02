@@ -12,6 +12,8 @@ library(reshape2)
 library(tidyr)
 library(ggplot2)
 library(devtools)
+devtools::install_github("pakillo/effectiveness_pckg", force=TRUE)
+
 library(effect.lndscp)
 ```
 
@@ -220,7 +222,7 @@ mm_total<-cbind(mm_visits_long,mm_fruits_long)
 
 
 #Adding columns pop and motif
-im_glm <- read.csv("/Users/apple/desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_4.csv")
+im_glm <- read.csv("/Users/CCGS_2/Desktop/Palmito/Postdoc-Interaction Networks/C.-humilis-Fugivorous-Networks/Interaction Motifs/Ant_Mutual_deer/im_glm_4.csv")
 
 marti<-im_glm[im_glm$pop == 'Martinazo',]
 matas<-im_glm[im_glm$pop == 'Matasgordas',]
@@ -247,6 +249,7 @@ mm_total["motif"]<-NA
 mm_total$motif<-im_glm$motif
 mm_total["combination"]<-NA
 mm_total$combination<-im_glm$combination
+
 
 #Effectiveness plot per plant
 p1<-effectiveness_plot(q1=mrt_total$visit_mean,q2=mrt_total$fruit_mean, pts.color= mrt_total$combination,pts.size=4, nlines=200,
